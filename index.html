@@ -103,23 +103,7 @@ const KEY='masahatuna-school-v3';
    للمزامنة بين كل الأجهزة: أنشئي مشروع Firebase وفعّلي Authentication (Email/Password) و Firestore،
    ثم الصقي هنا كائن الإعدادات: {apiKey:'...',authDomain:'...',projectId:'...',appId:'...'}
    MANAGER_EMAIL: بريد المديرة. إن تُرك فارغًا فأول حساب يُنشأ يصبح حساب المديرة. */
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyCXaHUdWmfI2i0ao8lLcL-H6P4sz4upQgw",
-  authDomain: "our-school-space-hiba.firebaseapp.com",
-  projectId: "our-school-space-hiba",
-  storageBucket: "our-school-space-hiba.firebasestorage.app",
-  messagingSenderId: "177249999704",
-  appId: "1:177249999704:web:03a69cd2b6320b7a47632d"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const FIREBASE_CONFIG={apiKey:"AIzaSyCXaHUdWmfI2i0ao8lLcL-H6P4sz4upQgw",authDomain:"our-school-space-hiba.firebaseapp.com",projectId:"our-school-space-hiba",storageBucket:"our-school-space-hiba.firebasestorage.app",messagingSenderId:"177249999704",appId:"1:177249999704:web:03a69cd2b6320b7a47632d"};
 const MANAGER_EMAIL='';
 let cloud=false,db=null,auth=null,ref=null,lastSynced=localStorage.getItem(KEY+'-base'),signupBusy=false,authResolved=!FIREBASE_CONFIG,authBusy=false;
 let cloudReadyRes;const cloudReady=new Promise(r=>cloudReadyRes=r);
