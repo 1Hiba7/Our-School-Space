@@ -282,11 +282,17 @@ async function initBackend(){
   setTimeout(cloudReadyRes,6000);
   auth.onAuthStateChanged(handleAuth);setSync('ok')
  }catch(e){console.warn(e);cloud=false;authResolved=true;cloudReadyRes();toast('تعذر الاتصال بالخادم، يعمل الموقع محليًا');setSync();evaluateSession()}}
+function ensureManagerRole(id,email){
+ if(!MANAGER_EMAIL||!email||email.toLowerCase()!==MANAGER_EMAIL.toLowerCase())return;
+ const p=data.profiles.find(x=>x.id===id);if(!p)return;
+ if(p.role==='manager'&&data.managerId===id)return;
+ data.profiles.forEach(x=>{if(x.id!==id&&x.role==='manager')x.role='student'});
+ p.role='manager';data.managerId=id;saveLocal();schedulePush()}
 async function handleAuth(u){
  await cloudReady;authResolved=true;
  if(u){
   if(signupBusy)return;
-  if(data.profiles.some(p=>p.id===u.uid)){data.currentUser=u.uid;data.guest=false;saveLocal();render()}
+  if(data.profiles.some(p=>p.id===u.uid)){ensureManagerRole(u.uid,u.email);data.currentUser=u.uid;data.guest=false;saveLocal();render()}
   else{await auth.signOut();data.currentUser=null;saveLocal();showAuth('login','هذا الحساب غير موجود أو تم حذفه. تواصلي مع المديرة.');return}
  }else if(data.currentUser){data.currentUser=null;saveLocal();render()}
  evaluateSession()}
@@ -302,6 +308,7 @@ function removeCreds(id){const c=loadCreds();delete c[id];saveCreds(c)}
 async function hashPw(pw,salt){if(window.crypto&&crypto.subtle){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+pw));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}return btoa(unescape(encodeURIComponent(salt+pw)))}
 async function doSignup(name,ident,pw){
  if(name.length<2)throw{code:'app/name'};
+ if(cloud&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ident))throw{code:'auth/invalid-email'};
  if(pw.length<6)throw{code:'auth/weak-password'};
  if(cloud)await cloudReady;
  const mgr=MANAGER_EMAIL?ident.toLowerCase()===MANAGER_EMAIL.toLowerCase():!data.profiles.some(p=>p.role==='manager');
@@ -314,7 +321,7 @@ async function doSignup(name,ident,pw){
  if(cloud){const ok=await pushCloud();signupBusy=false;if(!ok)throw{code:'cloud/save'}}
  else schedulePush()}
 async function doLogin(ident,pw){
- if(cloud){const c=await auth.signInWithEmailAndPassword(ident,pw);await cloudReady;if(!data.profiles.some(p=>p.id===c.user.uid)){await auth.signOut();throw{code:'app/deleted'}}data.currentUser=c.user.uid;data.guest=false;saveLocal();return}
+ if(cloud){const c=await auth.signInWithEmailAndPassword(ident,pw);await cloudReady;if(!data.profiles.some(p=>p.id===c.user.uid)){await auth.signOut();throw{code:'app/deleted'}}ensureManagerRole(c.user.uid,c.user.email);data.currentUser=c.user.uid;data.guest=false;saveLocal();return}
  const creds=loadCreds(),key=ident.toLowerCase(),id=Object.keys(creds).find(k=>creds[k].ident===key);
  if(!id||!data.profiles.some(p=>p.id===id))throw{code:'app/bad'};
  if(await hashPw(pw,creds[id].salt)!==creds[id].hash)throw{code:'app/bad'};
