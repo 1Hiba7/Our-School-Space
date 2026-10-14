@@ -1,8 +1,11 @@
 name: send-push
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '17 * * * *'   # احتياطي كل ساعة؛ التشغيل السريع يأتي من cron-job.org
   workflow_dispatch:
+concurrency:
+  group: send-push
+  cancel-in-progress: false
 permissions:
   contents: read
 jobs:
@@ -16,6 +19,6 @@ jobs:
         with:
           node-version: 20
       - run: npm install firebase-admin@12 --no-save
-      - run: node send-push.js
+      - run: node scripts/send-push.js
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
