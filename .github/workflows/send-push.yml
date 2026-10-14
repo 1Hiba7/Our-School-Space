@@ -19,6 +19,6 @@ jobs:
         with:
           node-version: 20
       - run: npm install firebase-admin@12 --no-save
-      - run: node scripts/send-push.js
+      - run: node send-push.js
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
