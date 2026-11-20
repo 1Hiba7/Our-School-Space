@@ -57,9 +57,12 @@ function fab(){if($('taskFab'))return;var b=document.createElement('button');b.i
 function decorateLessons(){var root=$('todayLessons');if(!root)return;root.querySelectorAll('.lesson').forEach(function(el){var nodes=el.querySelectorAll('div'),name=nodes.length>1?nodes[1].textContent.trim():'';var p=palette[name]||['#E8EAF6','📚'];el.style.setProperty('--lesson-color',p[0]);el.dataset.subjectIcon=p[1]})}
 function boot(){
  build();fab();decorateLessons();
+ if(typeof window.onGo==='function'){
+  var originalOnGo=window.onGo;
+  window.onGo=function(id){originalOnGo(id);if(id==='schedule'){selected=new Date();render()}};
+ }
  if($('home')&&window.MutationObserver)new MutationObserver(decorateLessons).observe($('home'),{childList:true,subtree:true});
- document.querySelectorAll('[data-nav="schedule"]').forEach(function(b){b.addEventListener('click',function(){selected=new Date();render()})});
- document.querySelectorAll('[onclick*="go(\'schedule\')"]').forEach(function(b){b.addEventListener('click',function(){selected=new Date();render()})});
+ render();
  if(timer)clearInterval(timer);timer=setInterval(function(){if($('schedule')&&!$('schedule').classList.contains('hidden')&&mode==='day'&&iso(selected)===iso(new Date()))renderTimeline()},30000);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
