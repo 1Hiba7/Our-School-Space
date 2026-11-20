@@ -59,3 +59,9 @@ body{font-family:"IBM Plex Sans Arabic",sans-serif;background:var(--paper);color
  #home>#latestAnnouncement:after{left:10px;width:70px;height:70px;border-radius:18px;font-size:35px}
  #home .metric:before{width:48px;height:48px;border-radius:15px;font-size:27px!important}
 }
+
+/* Keep the original export actions, but avoid duplicate legacy view tabs. */
+#schedule .sched-tools .view-switch{display:none!important}
+#schedule .sched-tools{justify-content:flex-start;gap:8px;margin:12px 0}
+#schedule .sched-tools .btn{min-height:40px}
+#scheduleRedesignHead{margin-top:6px}
