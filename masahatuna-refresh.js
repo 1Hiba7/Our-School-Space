@@ -7,13 +7,13 @@ function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOSt
 function dayName(d){return new Intl.DateTimeFormat('ar-EG',{weekday:'long'}).format(d)}
 function monthName(d){return new Intl.DateTimeFormat('ar-EG',{month:'long',year:'numeric'}).format(d)}
 function safe(s){return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})}
-function state(i,d){var n=new Date(),t=times[i];if(iso(d)<iso(n))return 'completed';if(iso(d)>iso(n)||!t)return 'upcoming';var m=n.getHours()*60+n.getMinutes(),a=+t[1].slice(0,2)*60 + +t[1].slice(3),b=+t[2].slice(0,2)*60 + +t[2].slice(3);return m>=b?'completed':m>=a?'current':'upcoming'}
-function dayData(d){var day=dayName(d),date=iso(d),a=window.attendance(day,date);return {day:day,date:date,attendance:a,lessons:a.working?window.timetableForDay(day,date):[]}}
+function lessonState(i,d){var n=new Date(),t=times[i];if(iso(d)<iso(n))return 'completed';if(iso(d)>iso(n)||!t)return 'upcoming';var m=n.getHours()*60+n.getMinutes(),a=Number(t[1].slice(0,2))*60+Number(t[1].slice(3)),b=Number(t[2].slice(0,2))*60+Number(t[2].slice(3));return m>=b?'completed':m>=a?'current':'upcoming'}
+function dataForDay(d){var day=dayName(d),date=iso(d),att=attendance(day,date);return {day:day,date:date,attendance:att,lessons:att.working?timetableForDay(day,date):[]}}
 function setMode(v){mode=v;render()}
 function build(){
  var sec=$('schedule');if(!sec||$('scheduleRedesignHead'))return;
  var head=document.createElement('div');head.className='schedule-redesign-head';head.id='scheduleRedesignHead';
- head.innerHTML='<div><p class="eyebrow">خطتكِ الدراسية</p><h1>جدول الحصص</h1></div><div class="schedule-tabs" role="tablist"><button type="button" data-mode="day" class="active">Day · اليوم</button><button type="button" data-mode="week">Week · الأسبوع</button><button type="button" data-mode="month">Month · الشهر</button></div>';
+ head.innerHTML='<div><p class="eyebrow">خطتكِ الدراسية</p><h1>جدول الحصص</h1></div><div class="schedule-tabs" role="tablist" aria-label="طريقة عرض الجدول"><button type="button" data-mode="day" class="active" aria-selected="true">Day · اليوم</button><button type="button" data-mode="week" aria-selected="false">Week · الأسبوع</button><button type="button" data-mode="month" aria-selected="false">Month · الشهر</button></div>';
  var strip=document.createElement('div');strip.id='scheduleDateStrip';strip.className='schedule-date-strip';
  var panel=document.createElement('div');panel.id='scheduleDayPanel';panel.className='schedule-day-panel';
  var timeline=document.createElement('div');timeline.id='scheduleTimeline';timeline.className='schedule-timeline';
@@ -21,43 +21,45 @@ function build(){
  var month=document.createElement('div');month.id='scheduleMonthPanel';month.hidden=true;
  var hero=sec.querySelector('.hero');if(hero)hero.after(head,strip,panel,month);
  var notice=$('scheduleNotice');if(notice)panel.before(notice);
- head.querySelectorAll('button[data-mode]').forEach(function(b){b.addEventListener('click',function(){setMode(b.dataset.mode)})});
- var tools=sec.querySelector('.sched-tools');if(tools)tools.setAttribute('aria-hidden','true');
+ head.querySelectorAll('[data-mode]').forEach(function(b){b.addEventListener('click',function(){setMode(b.dataset.mode)})});
 }
 function renderStrip(){
- var root=$('scheduleDateStrip');if(!root)return;var start=new Date(selected);start.setDate(start.getDate()-3);
- root.innerHTML='';for(var i=0;i<7;i++){var d=new Date(start);d.setDate(start.getDate()+i);var b=document.createElement('button');b.type='button';b.className='schedule-date-chip'+(iso(d)===iso(selected)?' active':'');b.innerHTML='<small>'+dayName(d)+'</small><strong>'+d.getDate()+'</strong>';b.addEventListener('click',function(date){return function(){selected=new Date(date+'T12:00:00');render()}}(iso(d)));root.appendChild(b)}
+ var root=$('scheduleDateStrip');if(!root)return;var start=new Date(selected);start.setDate(start.getDate()-3);root.innerHTML='';
+ for(var i=0;i<7;i++){var d=new Date(start);d.setDate(start.getDate()+i);var key=iso(d),b=document.createElement('button');b.type='button';b.className='schedule-date-chip'+(key===iso(selected)?' active':'');b.setAttribute('aria-pressed',key===iso(selected)?'true':'false');b.innerHTML='<small>'+dayName(d)+'</small><strong>'+d.getDate()+'</strong>';b.addEventListener('click',(function(date){return function(){selected=new Date(date+'T12:00:00');render()}})(key));root.appendChild(b)}
 }
 function renderTimeline(){
- var root=$('scheduleTimeline'),sum=$('scheduleSummary');if(!root)return;var data=dayData(selected),today=iso(selected)===iso(new Date());
- if(!data.attendance.working){root.innerHTML='<div class="empty">🌿 لا يوجد دوام مدرسي في هذا اليوم.</div>'}
- else{root.innerHTML=data.lessons.map(function(subject,i){var p=palette[subject]||['#E8EAF6','📚'],s=today?state(i,selected):(iso(selected)<iso(new Date())?'completed':'upcoming'),t=times[i]||['','',''],label=s==='completed'?'مكتملة':s==='current'?'الحصة الحالية':'قادمة';return '<article class="timeline-row '+s+'"><div class="timeline-time">'+safe(t[1])+'<br>—<br>'+safe(t[2])+'</div><div class="timeline-track"><span class="timeline-dot"></span></div><div class="timeline-card"><span class="timeline-subject-icon" style="background:'+p[0]+'">'+p[1]+'</span><div><h3>'+safe(subject)+'</h3><p>'+safe(window.teacher(subject))+'</p></div><span class="timeline-state">'+label+'</span></div></article>'}).join('')}
- var done=data.lessons.filter(function(x,i){return today?state(i,selected)==='completed':iso(selected)<iso(new Date())}).length;
- var current=data.lessons.findIndex(function(x,i){return today&&state(i,selected)==='current'}),next=data.lessons.find(function(x,i){return today&&state(i,selected)==='upcoming'});
- sum.innerHTML='<p class="eyebrow">ملخص اليوم</p><h2>'+safe(data.day)+'</h2><p>'+new Intl.DateTimeFormat('ar-EG',{day:'numeric',month:'long'}).format(selected)+'</p><strong>'+done+' / '+data.lessons.length+'</strong><p>حصص مكتملة</p><div class="progress"><i style="width:'+(data.lessons.length?done/data.lessons.length*100:0)+'%"></i></div><hr style="border:0;border-top:1px solid rgba(38,51,74,.15);margin:14px 0"><p><b>الحصة الحالية</b><br>'+(current>=0?safe(data.lessons[current]):today?'لا توجد حصة الآن':'—')+'</p><p><b>القادمة</b><br>'+(next?safe(next):'—')+'</p><button type="button" class="btn secondary" id="schedulePrintBtn">طباعة الجدول</button>';
+ var root=$('scheduleTimeline'),sum=$('scheduleSummary');if(!root||!sum)return;var data=dataForDay(selected),today=iso(selected)===iso(new Date());
+ if(!data.attendance.working){var why=data.attendance.holiday?.name||data.attendance.vacation?.name||data.attendance.exception?.reason||'لا يوجد دوام';root.innerHTML='<div class="empty">🌿 لا يوجد دوام مدرسي في هذا اليوم.<br><small>'+safe(why)+'</small></div>'}
+ else{root.innerHTML=data.lessons.map(function(subject,i){var p=palette[subject]||['#E8EAF6','📚'],st=today?lessonState(i,selected):(iso(selected)<iso(new Date())?'completed':'upcoming'),t=times[i]||['','',''],label=st==='completed'?'مكتملة':st==='current'?'الحصة الحالية':'قادمة';return '<article class="timeline-row '+st+'"><div class="timeline-time">'+safe(t[1])+'<br>—<br>'+safe(t[2])+'</div><div class="timeline-track"><span class="timeline-dot"></span></div><div class="timeline-card"><span class="timeline-subject-icon" style="background:'+p[0]+'">'+p[1]+'</span><div><h3>'+safe(subject)+'</h3><p>'+safe(teacher(subject))+'</p></div><span class="timeline-state">'+label+'</span></div></article>'}).join('')||'<div class="empty">لم تتم إضافة حصص لهذا اليوم.</div>'}
+ var done=data.lessons.filter(function(x,i){return today?lessonState(i,selected)==='completed':iso(selected)<iso(new Date())}).length;
+ var current=data.lessons.findIndex(function(x,i){return today&&lessonState(i,selected)==='current'}),next=data.lessons.find(function(x,i){return today&&lessonState(i,selected)==='upcoming'});
+ sum.innerHTML='<p class="eyebrow">ملخص اليوم</p><h2>'+safe(data.day)+'</h2><p>'+new Intl.DateTimeFormat('ar-EG',{day:'numeric',month:'long',year:'numeric'}).format(selected)+'</p><strong>'+done+' / '+data.lessons.length+'</strong><p>حصص مكتملة</p><div class="progress"><i style="width:'+(data.lessons.length?done/data.lessons.length*100:0)+'%"></i></div><hr style="border:0;border-top:1px solid rgba(38,51,74,.15);margin:14px 0"><p><b>الحصة الحالية</b><br>'+(current>=0?safe(data.lessons[current]):today?'لا توجد حصة الآن':'—')+'</p><p><b>القادمة</b><br>'+(next?safe(next):'—')+'</p><button type="button" class="btn secondary" id="schedulePrintBtn">طباعة الجدول</button>';
  $('schedulePrintBtn').addEventListener('click',function(){window.print()});
 }
 function renderMonth(){
  var root=$('scheduleMonthPanel'),y=selected.getFullYear(),m=selected.getMonth(),first=new Date(y,m,1).getDay(),count=new Date(y,m+1,0).getDate(),heads=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
  var html='<div class="section-head"><button class="btn secondary" id="monthPrev">‹ السابق</button><h2 class="section-title">'+monthName(selected)+'</h2><button class="btn secondary" id="monthNext">التالي ›</button></div><div class="schedule-month-grid">'+heads.map(function(x){return '<div class="cal-head">'+x+'</div>'}).join('');
  for(var i=0;i<first;i++)html+='<div></div>';
- for(var d=1;d<=count;d++){var date=new Date(y,m,d,12),key=iso(date),a=window.attendance(dayName(date),key);html+='<button class="schedule-month-day '+(key===iso(new Date())?'today ':'')+(key===iso(selected)?'selected':'')+'" data-day="'+key+'">'+d+'<small>'+(a.working?'دوام':'عطلة')+'</small></button>'}
- root.innerHTML=html+'</div>'; $('monthPrev').addEventListener('click',function(){selected=new Date(y,m-1,1,12);render()});$('monthNext').addEventListener('click',function(){selected=new Date(y,m+1,1,12);render()});
+ for(var d=1;d<=count;d++){var date=new Date(y,m,d,12),key=iso(date),a=attendance(dayName(date),key);html+='<button class="schedule-month-day '+(key===iso(new Date())?'today ':'')+(key===iso(selected)?'selected':'')+'" data-day="'+key+'">'+d+'<small>'+(a.working?'دوام':'عطلة')+'</small></button>'}
+ root.innerHTML=html+'</div>';
+ $('monthPrev').addEventListener('click',function(){selected=new Date(y,m-1,1,12);render()});$('monthNext').addEventListener('click',function(){selected=new Date(y,m+1,1,12);render()});
  root.querySelectorAll('[data-day]').forEach(function(b){b.addEventListener('click',function(){selected=new Date(b.dataset.day+'T12:00:00');setMode('day')})});
 }
 function render(){
  if(!$('scheduleRedesignHead'))return;
- $('scheduleRedesignHead').querySelectorAll('[data-mode]').forEach(function(b){b.classList.toggle('active',b.dataset.mode===mode)});
+ $('scheduleRedesignHead').querySelectorAll('[data-mode]').forEach(function(b){var active=b.dataset.mode===mode;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false')});
  var isDay=mode==='day',isWeek=mode==='week',isMonth=mode==='month';
- $('scheduleDateStrip').hidden=isMonth;$('scheduleDayPanel').hidden=!isDay;$('scheduleMonthPanel').hidden=!isMonth;$('weekView').hidden=!isWeek;
- if(isDay){renderStrip();renderTimeline()}if(isMonth)renderMonth();if(isWeek)window.renderSchedule();
+ $('scheduleDateStrip').hidden=!isDay;$('scheduleDayPanel').hidden=!isDay;$('scheduleMonthPanel').hidden=!isMonth;
+ $('weekView').classList.toggle('hidden',!isWeek);
+ if(isDay){renderStrip();renderTimeline()}if(isMonth)renderMonth();if(isWeek)renderSchedule();
 }
-function fab(){if($('taskFab'))return;var b=document.createElement('button');b.id='taskFab';b.type='button';b.className='task-fab';b.textContent='+';b.title='إضافة مهمة';b.setAttribute('aria-label','إضافة مهمة جديدة');b.addEventListener('click',function(){window.openTask()});document.body.appendChild(b);var add=$('tasks')&&$('tasks').querySelector('.hero button[onclick*="openTask"]');if(add)add.hidden=true}
+function fab(){if($('taskFab'))return;var b=document.createElement('button');b.id='taskFab';b.type='button';b.className='task-fab';b.textContent='+';b.title='إضافة مهمة';b.setAttribute('aria-label','إضافة مهمة جديدة');b.addEventListener('click',function(){openTask()});document.body.appendChild(b);var add=$('tasks')&&$('tasks').querySelector('.hero button[onclick*="openTask"]');if(add)add.hidden=true}
 function decorateLessons(){var root=$('todayLessons');if(!root)return;root.querySelectorAll('.lesson').forEach(function(el){var nodes=el.querySelectorAll('div'),name=nodes.length>1?nodes[1].textContent.trim():'';var p=palette[name]||['#E8EAF6','📚'];el.style.setProperty('--lesson-color',p[0]);el.dataset.subjectIcon=p[1]})}
 function boot(){
  build();fab();decorateLessons();
- if($('home'))new MutationObserver(decorateLessons).observe($('home'),{childList:true,subtree:true});
+ if($('home')&&window.MutationObserver)new MutationObserver(decorateLessons).observe($('home'),{childList:true,subtree:true});
  document.querySelectorAll('[data-nav="schedule"]').forEach(function(b){b.addEventListener('click',function(){selected=new Date();render()})});
+ document.querySelectorAll('[onclick*="go(\'schedule\')"]').forEach(function(b){b.addEventListener('click',function(){selected=new Date();render()})});
  if(timer)clearInterval(timer);timer=setInterval(function(){if($('schedule')&&!$('schedule').classList.contains('hidden')&&mode==='day'&&iso(selected)===iso(new Date()))renderTimeline()},30000);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
