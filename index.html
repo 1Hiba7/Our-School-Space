@@ -1048,6 +1048,7 @@ async function updateApp(b){b.disabled=true;b.textContent='جارٍ التحدي
 renderInstall();setTimeout(checkUpdate,2500);
 setTimeout(()=>{const s=document.getElementById('splash');if(s){s.classList.add('out');setTimeout(()=>s.remove(),600)}},1100);
 </script><script src="masahatuna-refresh.js"></script>
+<script>
 /* Section search controls: reveal filters only on demand */
 function installSectionSearch(){
  const setup=(sectionId,buttonLabel,targetId)=>{
@@ -1074,4 +1075,5 @@ function installSectionSearch(){
 }
 document.addEventListener('DOMContentLoaded',installSectionSearch);
 
+</script>
 </body></html>
