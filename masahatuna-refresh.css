@@ -347,3 +347,11 @@ body{font-family:"IBM Plex Sans Arabic",sans-serif;background:var(--paper);color
  body.printing.print-mode-day #schedule #lessonsView,body.printing.print-mode-week #schedule #weekView,body.printing.print-mode-month #schedule #monthView{display:block!important}
  body.printing #schedule .weekly-wrap{overflow:visible!important}
 }
+
+
+/* Tablet dashboard metrics use the same icon scale and inset as desktop */
+@media(min-width:701px) and (max-width:1034px){
+ #home .metric{grid-template-columns:minmax(0,1fr) 70px!important;padding:15px 18px!important;min-height:112px!important;gap:4px 10px!important}
+ #home .metric:before{width:66px!important;height:66px!important;min-width:66px!important;min-height:66px!important;border-radius:20px!important;justify-self:center!important;margin:0!important}
+ #home .metric>*{min-width:0}
+}
