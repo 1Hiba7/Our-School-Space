@@ -862,10 +862,17 @@ setInterval(()=>checkNewNotices(false),30000);
 
 /* ---- الإعدادات ---- */
 const PK=KEY+'-prefs',NTYPES=['دوام','إعلان','واجب','اختبار','عام'];
-let prefs=(()=>{let p={};try{p=JSON.parse(localStorage.getItem(PK))||{}}catch(e){}return{sound:p.sound!==false,notifAll:p.notifAll!==false,types:p.types||{},font:p.font||100,contrast:!!p.contrast}})();
+let prefs=(()=>{let p={};try{p=JSON.parse(localStorage.getItem(PK))||{}}catch(e){}return{sound:p.sound!==false,notifAll:p.notifAll!==false,types:p.types||{},font:p.font||100,contrast:!!p.contrast,palette:['blue','coral','sage','lavender'].includes(p.palette)?p.palette:'blue'}})();
 function savePrefs(){try{localStorage.setItem(PK,JSON.stringify(prefs))}catch(e){}}
 function typeOn(t){return prefs.notifAll&&prefs.types[t]!==false}
-function applyPrefs(){document.documentElement.style.fontSize=prefs.font+'%';document.documentElement.classList.toggle('hc',prefs.contrast)}
+const PALETTES={
+ blue:{label:'الأزرق الأساسي',light:'#5269C8',light2:'#4056B4',dark:'#91A1F1',dark2:'#B6C0FF'},
+ coral:{label:'المرجاني',light:'#D96F57',light2:'#B95843',dark:'#F09A83',dark2:'#FFC0AE'},
+ sage:{label:'الأخضر الهادئ',light:'#668D78',light2:'#4E735F',dark:'#91B69F',dark2:'#B9D5C2'},
+ lavender:{label:'اللافندر',light:'#8A72B0',light2:'#705895',dark:'#B39AD8',dark2:'#D0BCEB'}
+};
+function applyPrefs(){document.documentElement.style.fontSize=prefs.font+'%';document.documentElement.classList.toggle('hc',prefs.contrast);const p=PALETTES[prefs.palette]||PALETTES.blue,dark=data.theme==='dark';document.documentElement.style.setProperty('--accent',dark?p.dark:p.light);document.documentElement.style.setProperty('--accent2',dark?p.dark2:p.light2)}
+function setPalette(name){if(!PALETTES[name])return;prefs.palette=name;savePrefs();applyPrefs();renderSettings()}
 function setPref(k,v){prefs[k]=v;savePrefs();updateBadge()}
 function setTypePref(t,v){prefs.types[t]=v;savePrefs();updateBadge()}
 function setFont(v){prefs.font=+v;savePrefs();applyPrefs();const e=document.getElementById('fontVal');if(e)e.textContent=prefs.font+'%'}
@@ -882,7 +889,7 @@ ${sw('🔊 أصوات الموقع (فتح النوافذ وإغلاقها وا�
 ${cloud&&('Notification' in window)?'<div id="pushBox" style="margin-top:14px"></div>':''}</section>
 <section class="card" style="padding:18px;margin-top:14px"><h2 style="margin-top:0">🎨 المظهر وسهولة القراءة</h2>
 <div class="set-row"><span>الوضع</span><div class="view-switch"><button class="${data.theme!=='dark'?'active':''}" onclick="setThemeMode('light')">☀️ نهاري</button><button class="${data.theme==='dark'?'active':''}" onclick="setThemeMode('dark')">🌙 ليلي</button></div></div>
-<div class="set-row"><span>حجم الخط <strong id="fontVal">${prefs.font}%</strong></span><input type="range" min="85" max="150" step="5" value="${prefs.font}" oninput="setFont(this.value)" style="min-width:160px"></div>
+<div class="palette-setting"><div><strong>ألوان الهوية</strong><p class="muted tiny">اختاري اللون التفاعلي الذي تفضلينه، مع بقاء ألوان الهوية الأساسية كما هي.</p></div><div class="palette-options">${Object.entries(PALETTES).map(([key,p])=>'<button type="button" class="palette-choice '+(prefs.palette===key?'active':'')+'" aria-pressed="'+(prefs.palette===key)+'" title="'+p.label+'" onclick="setPalette(\''+key+'\')"><span style="background:'+p.light+'"></span><small>'+p.label+'</small></button>').join('')}</div></div><div class="set-row"><span>حجم الخط <strong id="fontVal">${prefs.font}%</strong></span><input type="range" min="85" max="150" step="5" value="${prefs.font}" oninput="setFont(this.value)" style="min-width:160px"></div>
 ${sw('زيادة التباين',prefs.contrast,"setContrast(this.checked)")}</section>
 <section class="card" style="padding:18px;margin-top:14px"><h2 style="margin-top:0">📲 التطبيق</h2><p class="muted">رقم النسخة: <span class="ltr" style="display:inline-block">${APP_VERSION}</span> · <strong id="setVer">…</strong></p><button class="btn primary" onclick="updateApp(this)">🔄 تحديث التطبيق</button></section>`;
   if(document.getElementById('pushBox'))refreshPush();
