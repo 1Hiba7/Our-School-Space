@@ -6,6 +6,7 @@ var selected=new Date(),mode='day',timer=null;
 function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
 function dayName(d){return new Intl.DateTimeFormat('ar-EG',{weekday:'long'}).format(d)}
 function monthName(d){return new Intl.DateTimeFormat('ar-EG',{month:'long',year:'numeric'}).format(d)}
+function formalSubject(s){return ({'دين':'التربية الإسلامية','تلاوة':'التلاوة والتجويد','رياضة':'التربية البدنية','فن':'الفنون والحرف','عربي':'اللغة العربية'})[s]||s}
 function safe(s){return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})}
 function lessonState(i,d){var n=new Date(),t=times[i];if(iso(d)<iso(n))return 'completed';if(iso(d)>iso(n)||!t)return 'upcoming';var m=n.getHours()*60+n.getMinutes(),a=Number(t[1].slice(0,2))*60+Number(t[1].slice(3)),b=Number(t[2].slice(0,2))*60+Number(t[2].slice(3));return m>=b?'completed':m>=a?'current':'upcoming'}
 function dataForDay(d){var day=dayName(d),date=iso(d),att=attendance(day,date);return {day:day,date:date,attendance:att,lessons:att.working?timetableForDay(day,date):[]}}
@@ -54,7 +55,7 @@ function render(){
  renderStrip();if(isDay)renderTimeline();if(isMonth)renderMonth();if(isWeek)renderSchedule();
 }
 function fab(){if($('taskFab'))return;var b=document.createElement('button');b.id='taskFab';b.type='button';b.className='task-fab';b.textContent='+';b.title='إضافة مهمة';b.setAttribute('aria-label','إضافة مهمة جديدة');b.addEventListener('click',function(){openTask()});document.body.appendChild(b);var add=$('tasks')&&$('tasks').querySelector('.hero button[onclick*="openTask"]');if(add)add.hidden=true}
-function decorateLessons(){var root=$('todayLessons');if(!root)return;root.querySelectorAll('.lesson').forEach(function(el){var nodes=el.querySelectorAll('div'),name=nodes.length>1?nodes[1].textContent.trim():'';var p=palette[name]||['#E8EAF6','📚'];el.style.setProperty('--lesson-color',p[0]);el.dataset.subjectIcon=p[1]})}
+function decorateLessons(){['todayLessons','weekView','lessonsView','teachers'].forEach(function(id){var root=$(id);if(!root)return;root.querySelectorAll('.lesson,.cell,.soft').forEach(function(el){var target=el.querySelector('.sub')||el.querySelector('div[style*="font-size"]')||el.querySelector('strong');if(!target)return;var raw=target.textContent.trim(),label=formalSubject(raw);if(label!==raw)target.textContent=label;var p=palette[raw]||palette[label]||['#E8EAF6','📚'];el.style.setProperty('--lesson-color',p[0]);el.dataset.subjectIcon=p[1]})})}
 function boot(){
  build();fab();decorateLessons();
  if(typeof window.onGo==='function'){
