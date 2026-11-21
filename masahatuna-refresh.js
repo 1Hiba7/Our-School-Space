@@ -26,7 +26,7 @@ function build(){
 }
 function renderStrip(){
  var root=$('scheduleDateStrip');if(!root)return;var start=new Date(selected);start.setDate(start.getDate()-3);root.innerHTML='';
- for(var i=0;i<7;i++){var d=new Date(start);d.setDate(start.getDate()+i);var key=iso(d),b=document.createElement('button');b.type='button';b.className='schedule-date-chip'+(key===iso(selected)?' active':'');b.setAttribute('aria-pressed',key===iso(selected)?'true':'false');b.innerHTML='<small>'+dayName(d)+'</small><strong>'+d.getDate()+'</strong>';b.addEventListener('click',(function(date){return function(){selected=new Date(date+'T12:00:00');render()}})(key));root.appendChild(b)}
+ for(var i=0;i<7;i++){var d=new Date(start);d.setDate(start.getDate()+i);var key=iso(d),b=document.createElement('button');b.type='button';b.className='schedule-date-chip'+(key===iso(selected)?' active':'');b.setAttribute('aria-pressed',key===iso(selected)?'true':'false');b.innerHTML='<small>'+dayName(d)+'</small><strong>'+d.getDate()+'</strong>';b.addEventListener('click',(function(date){return function(){selected=new Date(date+'T12:00:00');var panel=$('scheduleDayPanel');if(panel){panel.classList.remove('fade-in');void panel.offsetWidth;panel.classList.add('fade-in')}render()}})(key));root.appendChild(b)}
 }
 function renderTimeline(){
  var root=$('scheduleTimeline'),sum=$('scheduleSummary');if(!root||!sum)return;var data=dataForDay(selected),today=iso(selected)===iso(new Date());
@@ -48,6 +48,7 @@ function renderMonth(){
 }
 function render(){
  if(!$('scheduleRedesignHead'))return;
+ var dayPanel=$('scheduleDayPanel');if(dayPanel&&mode==='day'){dayPanel.classList.remove('fade-in');void dayPanel.offsetWidth;dayPanel.classList.add('fade-in')}
  $('scheduleRedesignHead').querySelectorAll('[data-mode]').forEach(function(b){var active=b.dataset.mode===mode;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false')});
  var isDay=mode==='day',isWeek=mode==='week',isMonth=mode==='month';
  $('scheduleDateStrip').hidden=false;$('scheduleDayPanel').hidden=!isDay;$('scheduleMonthPanel').hidden=!isMonth;
