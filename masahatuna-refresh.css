@@ -321,3 +321,29 @@ body{font-family:"IBM Plex Sans Arabic",sans-serif;background:var(--paper);color
 @media(min-width:1001px){#settingsBox{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;grid-template-areas:"notify appearance" "notify app"!important;align-items:start!important;gap:14px!important}#settingsBox>section:nth-child(1){grid-area:notify}#settingsBox>section:nth-child(2){grid-area:appearance;margin-top:0!important}#settingsBox>section:nth-child(3){grid-area:app;margin-top:0!important}}
 @media(min-width:1001px){.admin-schedule-editor{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(260px,.85fr);gap:16px;align-items:start}.admin-schedule-workdays .permission-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.admin-schedule-workdays .section-head{margin:6px 0 8px}}
 #guide>.hero{text-align:center!important}#guide>.hero .guide-logo{display:block;margin-inline:auto}#guide>.hero h1,#guide>.hero p{margin-inline:auto;max-width:760px;text-align:center}
+
+
+/* Date navigation, day/week/month schedule layouts */
+.schedule-date-strip{display:flex;align-items:stretch;gap:7px;overflow-x:auto;scrollbar-width:none;padding:4px 2px 10px;touch-action:pan-x;overscroll-behavior-x:contain}
+.schedule-date-strip::-webkit-scrollbar{display:none}
+.schedule-date{flex:1 0 74px;min-width:66px;border:1px solid var(--line);border-radius:15px;background:var(--card);padding:9px 6px;text-align:center;transition:transform .28s ease,background .2s,border-color .2s;cursor:pointer}
+.schedule-date strong,.schedule-date small{display:block}.schedule-date small{color:var(--muted);font-size:.75rem;margin-top:3px}
+.schedule-date.active{background:var(--accent);color:#fff;border-color:var(--accent);transform:translateY(-3px);box-shadow:0 7px 18px rgba(82,105,200,.2)}
+.schedule-date.active small{color:#fff}
+.schedule-date-strip.shift .schedule-date{animation:dateSlide .32s ease both}
+@keyframes dateSlide{from{opacity:.35;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+.schedule-month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}
+.schedule-month-day{min-height:118px;padding:9px;border:1px solid var(--line);border-radius:13px;background:var(--card);text-align:right;overflow:hidden}
+.schedule-month-day.outside{opacity:.35}.schedule-month-day.today{border:2px solid var(--accent)}
+.schedule-month-day .day-lessons-mini{font-size:.72rem;color:var(--muted);margin-top:6px;line-height:1.5}
+.schedule-month-day .day-num{font-weight:800}
+.schedule-month-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0}
+#schedule .sched-tools .view-switch{display:flex;gap:4px}
+#schedule .sched-tools .view-switch button.active{background:var(--accent);color:#fff}
+@media(max-width:600px){.schedule-date{flex-basis:62px;min-width:62px;padding:8px 4px}.schedule-month-grid{gap:3px}.schedule-month-day{min-height:78px;padding:5px 3px;border-radius:9px}.schedule-month-day .day-lessons-mini{font-size:.6rem;line-height:1.35}}
+@media print{
+ body.printing #schedule>.hero,body.printing #schedule .sched-tools,body.printing #schedule #scheduleDateStrip,body.printing #schedule #scheduleNotice,body.printing #schedule #timeChips,body.printing #schedule #teachers,body.printing #schedule .section-head{display:none!important}
+ body.printing #schedule #weekView,body.printing #schedule #lessonsView,body.printing #schedule #monthView{display:none!important}
+ body.printing.print-mode-day #schedule #lessonsView,body.printing.print-mode-week #schedule #weekView,body.printing.print-mode-month #schedule #monthView{display:block!important}
+ body.printing #schedule .weekly-wrap{overflow:visible!important}
+}
