@@ -14,7 +14,7 @@ function setMode(v){mode=v;render()}
 function build(){
  var sec=$('schedule');if(!sec||$('scheduleRedesignHead'))return;
  var head=document.createElement('div');head.className='schedule-redesign-head';head.id='scheduleRedesignHead';
- head.innerHTML='<div><p class="eyebrow">خطتكِ الدراسية</p><h1>جدول الحصص</h1></div><div class="schedule-tabs" role="tablist" aria-label="طريقة عرض الجدول"><button type="button" data-mode="day" class="active" aria-selected="true">Day · اليوم</button><button type="button" data-mode="week" aria-selected="false">Week · الأسبوع</button><button type="button" data-mode="month" aria-selected="false">Month · الشهر</button></div>';
+ head.innerHTML='<div><p class="eyebrow">خطتكِ الدراسية</p><h1>جدول الحصص</h1></div><div class="schedule-tabs" role="tablist" aria-label="طريقة عرض الجدول"><button type="button" data-mode="day" class="active" aria-selected="true">اليوم</button><button type="button" data-mode="week" aria-selected="false">الأسبوع</button><button type="button" data-mode="month" aria-selected="false">الشهر</button></div>';
  var strip=document.createElement('div');strip.id='scheduleDateStrip';strip.className='schedule-date-strip';
  var panel=document.createElement('div');panel.id='scheduleDayPanel';panel.className='schedule-day-panel';
  var timeline=document.createElement('div');timeline.id='scheduleTimeline';timeline.className='schedule-timeline';
