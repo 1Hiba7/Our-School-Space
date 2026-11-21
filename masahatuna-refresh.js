@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 var $=function(id){return document.getElementById(id)};
-var palette={'جغرافيا':['#D8CBEA','🌍'],'فيزياء':['#DCE4FA','⚛️'],'عربي':['#F7DED4','📖'],'دين':['#D9E9DD','☪️'],'رياضيات':['#F7E6C9','📐'],'أحياء':['#D9E9DD','🧬'],'اللغة الإنجليزية':['#F6DFD5','🔤'],'كيمياء':['#DDE8F2','🧪'],'تلاوة':['#D9E9DD','📗'],'المهارات الرقمية':['#DCE4FA','💻'],'فن':['#F2DDED','🎨'],'رياضة':['#F7E6C9','🏅']};
+var palette={'جغرافيا':['#D8CBEA','🌍'],'فيزياء':['#DCE4FA','⚛️'],'عربي':['#F7DED4','📖'],'اللغة العربية':['#F7DED4','📖'],'دين':['#D9E9DD','☪️'],'التربية الإسلامية':['#D9E9DD','☪️'],'رياضيات':['#F7E6C9','📐'],'أحياء':['#D9E9DD','🧬'],'اللغة الإنجليزية':['#F6DFD5','🔤'],'كيمياء':['#DDE8F2','🧪'],'تلاوة':['#D9E9DD','📗'],'التلاوة والتجويد':['#D9E9DD','📗'],'المهارات الرقمية':['#DCE4FA','💻'],'فن':['#F2DDED','🎨'],'الفنون والحرف':['#F2DDED','🎨'],'رياضة':['#F7E6C9','🏅'],'التربية البدنية':['#F7E6C9','🏅']};
 var selected=new Date(),mode='day',timer=null;
 function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
 function dayName(d){return new Intl.DateTimeFormat('ar-EG',{weekday:'long'}).format(d)}
@@ -19,9 +19,9 @@ function build(){
  var timeline=document.createElement('div');timeline.id='scheduleTimeline';timeline.className='schedule-timeline';
  var summary=document.createElement('aside');summary.id='scheduleSummary';summary.className='schedule-summary';panel.append(timeline,summary);
  var month=document.createElement('div');month.id='scheduleMonthPanel';month.hidden=true;
- var hero=sec.querySelector('.hero');if(hero)hero.after(head,strip,panel,month);
+ var actions=document.createElement('div');actions.className='schedule-redesign-actions';actions.innerHTML='<button type="button" class="btn secondary" id="scheduleExportBtn">تنزيل الجدول</button><button type="button" class="btn secondary" id="schedulePrintAction">طباعة الجدول</button>';head.appendChild(actions);var hero=sec.querySelector('.hero');if(hero)hero.after(head,strip,panel,month);
  var notice=$('scheduleNotice');if(notice)panel.before(notice);
- head.querySelectorAll('[data-mode]').forEach(function(b){b.addEventListener('click',function(){setMode(b.dataset.mode)})});
+ head.querySelectorAll('[data-mode]').forEach(function(b){b.addEventListener('click',function(){setMode(b.dataset.mode)})});$('scheduleExportBtn').addEventListener('click',function(){exportScheduleImage()});$('schedulePrintAction').addEventListener('click',function(){printSchedule()});
 }
 function renderStrip(){
  var root=$('scheduleDateStrip');if(!root)return;var start=new Date(selected);start.setDate(start.getDate()-3);root.innerHTML='';
@@ -33,8 +33,8 @@ function renderTimeline(){
  else{root.innerHTML=data.lessons.map(function(subject,i){var p=palette[subject]||['#E8EAF6','📚'],st=today?lessonState(i,selected):(iso(selected)<iso(new Date())?'completed':'upcoming'),t=times[i]||['','',''],label=st==='completed'?'مكتملة':st==='current'?'الحصة الحالية':'قادمة';return '<article class="timeline-row '+st+'"><div class="timeline-time">'+safe(t[1])+'<br>—<br>'+safe(t[2])+'</div><div class="timeline-track"><span class="timeline-dot"></span></div><div class="timeline-card"><span class="timeline-subject-icon" style="background:'+p[0]+'">'+p[1]+'</span><div><h3>'+safe(subject)+'</h3><p>'+safe(teacher(subject))+'</p></div><span class="timeline-state">'+label+'</span></div></article>'}).join('')||'<div class="empty">لم تتم إضافة حصص لهذا اليوم.</div>'}
  var done=data.lessons.filter(function(x,i){return today?lessonState(i,selected)==='completed':iso(selected)<iso(new Date())}).length;
  var current=data.lessons.findIndex(function(x,i){return today&&lessonState(i,selected)==='current'}),next=data.lessons.find(function(x,i){return today&&lessonState(i,selected)==='upcoming'});
- sum.innerHTML='<p class="eyebrow">ملخص اليوم</p><h2>'+safe(data.day)+'</h2><p>'+new Intl.DateTimeFormat('ar-EG',{day:'numeric',month:'long',year:'numeric'}).format(selected)+'</p><strong>'+done+' / '+data.lessons.length+'</strong><p>حصص مكتملة</p><div class="progress"><i style="width:'+(data.lessons.length?done/data.lessons.length*100:0)+'%"></i></div><hr style="border:0;border-top:1px solid rgba(38,51,74,.15);margin:14px 0"><p><b>الحصة الحالية</b><br>'+(current>=0?safe(data.lessons[current]):today?'لا توجد حصة الآن':'—')+'</p><p><b>القادمة</b><br>'+(next?safe(next):'—')+'</p><button type="button" class="btn secondary" id="schedulePrintBtn">طباعة الجدول</button>';
- $('schedulePrintBtn').addEventListener('click',function(){window.print()});
+ sum.innerHTML='<div class="summary-dayline"><h2>'+safe(data.day)+'</h2><p>'+iso(selected)+'</p></div><strong class="summary-count">'+done+' / '+data.lessons.length+' حصص مكتملة</strong><span class="muted">إنجاز اليوم</span><div class="progress summary-progress"><i style="width:'+(data.lessons.length?done/data.lessons.length*100:0)+'%"></i></div><p class="summary-current"><b>الحصة الحالية:</b> '+(current>=0?safe(data.lessons[current]):today?'—':'—')+'</p><p class="summary-next"><b>الحصة القادمة:</b> '+(next?safe(next):'—')+'</p>';
+
 }
 function renderMonth(){
  var root=$('scheduleMonthPanel'),y=selected.getFullYear(),m=selected.getMonth(),first=new Date(y,m,1).getDay(),count=new Date(y,m+1,0).getDate(),heads=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
@@ -49,9 +49,9 @@ function render(){
  if(!$('scheduleRedesignHead'))return;
  $('scheduleRedesignHead').querySelectorAll('[data-mode]').forEach(function(b){var active=b.dataset.mode===mode;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false')});
  var isDay=mode==='day',isWeek=mode==='week',isMonth=mode==='month';
- $('scheduleDateStrip').hidden=!isDay;$('scheduleDayPanel').hidden=!isDay;$('scheduleMonthPanel').hidden=!isMonth;
+ $('scheduleDateStrip').hidden=false;$('scheduleDayPanel').hidden=!isDay;$('scheduleMonthPanel').hidden=!isMonth;
  $('weekView').classList.toggle('hidden',!isWeek);
- if(isDay){renderStrip();renderTimeline()}if(isMonth)renderMonth();if(isWeek)renderSchedule();
+ renderStrip();if(isDay)renderTimeline();if(isMonth)renderMonth();if(isWeek)renderSchedule();
 }
 function fab(){if($('taskFab'))return;var b=document.createElement('button');b.id='taskFab';b.type='button';b.className='task-fab';b.textContent='+';b.title='إضافة مهمة';b.setAttribute('aria-label','إضافة مهمة جديدة');b.addEventListener('click',function(){openTask()});document.body.appendChild(b);var add=$('tasks')&&$('tasks').querySelector('.hero button[onclick*="openTask"]');if(add)add.hidden=true}
 function decorateLessons(){var root=$('todayLessons');if(!root)return;root.querySelectorAll('.lesson').forEach(function(el){var nodes=el.querySelectorAll('div'),name=nodes.length>1?nodes[1].textContent.trim():'';var p=palette[name]||['#E8EAF6','📚'];el.style.setProperty('--lesson-color',p[0]);el.dataset.subjectIcon=p[1]})}
