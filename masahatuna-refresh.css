@@ -223,3 +223,26 @@ body{font-family:"IBM Plex Sans Arabic",sans-serif;background:var(--paper);color
  #cal .tag,#cal small{font-size:.5rem!important;white-space:nowrap}
  .calendar.grid{grid-template-columns:repeat(7,minmax(0,1fr))!important;gap:2px!important}
 }
+
+/* Final compact interaction details */
+#home>#latestAnnouncement{grid-column:1/-1!important;width:100%;min-width:0}
+#home>#latestAnnouncement .notice-card{min-width:0;overflow:hidden}
+#home .section-head:has(+ #latestAnnouncement){margin-top:8px}
+.section-search-toggle{display:inline-grid;place-items:center;flex:0 0 auto;margin-inline-start:auto;width:42px;height:42px}
+#activities>.hero,#books>.hero,#tasks>.hero{position:relative;padding-inline-end:72px}
+.task-search-wrap{margin-top:10px;max-width:480px}
+.task-search-wrap .form-control{background:rgba(255,255,255,.86)}
+#activityFilter,#bookFilters{transition:opacity .2s ease,transform .2s ease}
+#activityFilter.hidden,#bookFilters.hidden{display:none!important}
+@media(max-width:706px){
+ #home>#latestAnnouncement{grid-column:1/-1!important}
+ #home>#latestAnnouncement .notice-card{padding:13px!important}
+ #home>#latestAnnouncement .notice-card>div:first-child{gap:6px;flex-wrap:wrap}
+ #home>#latestAnnouncement .notice-card h2{font-size:1rem;overflow-wrap:anywhere}
+}
+@media(max-width:478px){
+ #cal{display:grid!important;grid-template-columns:repeat(7,minmax(0,1fr))!important;gap:2px!important;width:100%;min-width:0!important;overflow:visible!important}
+ #cal>*{min-width:0!important;width:auto!important;max-width:100%!important}
+ #cal .cal-day{aspect-ratio:1/1;min-height:0!important;padding:2px 0!important;border-radius:8px!important;font-size:.68rem!important}
+ #cal .cal-head{font-size:.58rem!important;overflow:hidden}
+}
