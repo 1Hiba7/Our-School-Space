@@ -246,3 +246,15 @@ body{font-family:"IBM Plex Sans Arabic",sans-serif;background:var(--paper);color
  #cal .cal-day{aspect-ratio:1/1;min-height:0!important;padding:2px 0!important;border-radius:8px!important;font-size:.68rem!important}
  #cal .cal-head{font-size:.58rem!important;overflow:hidden}
 }
+
+/* Keep the tablet dashboard in the same compact flow as mobile */
+@media(min-width:600px) and (max-width:1034px){
+ #home>.grid.metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #home>#liveCard,#home>#remindersBox,#home>#latestAnnouncement{grid-column:1/-1!important}
+ #home>#todayLessons{grid-template-columns:1fr!important}
+ #home>.grid[style*="repeat(4,1fr)"]{grid-column:1/-1!important;grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:599px){
+ #home>.grid.metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #home>#liveCard,#home>#remindersBox,#home>#latestAnnouncement{grid-column:1/-1!important}
+}
