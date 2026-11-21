@@ -129,3 +129,24 @@ body{font-family:"IBM Plex Sans Arabic",sans-serif;background:var(--paper);color
  body.printing #schedule #scheduleTimeline,body.printing #schedule #weekView,body.printing #schedule #scheduleMonthPanel{display:block!important}
  body.printing #schedule .timeline-card{box-shadow:none!important}
 }
+
+/* Final compact interaction polish */
+#home>.hero button.btn{display:none!important}
+#tasks>.hero button[onclick*="openTask"]{display:none!important}
+.modal-bg .modal,.modal-bg .modal .notice{border-color:var(--line)}
+.modal-bg .modal .notice{background:var(--sky);color:var(--ink)}
+.modal-bg .modal .btn.danger,.modal-bg .modal button.danger{background:color-mix(in srgb,var(--coral) 20%,var(--card));color:var(--ink);border:1px solid color-mix(in srgb,var(--coral) 45%,var(--line))}
+.dark .modal-bg .modal .notice{background:var(--sky);color:var(--ink)}
+.dark .modal-bg .modal .btn.danger,.dark .modal-bg .modal button.danger{background:color-mix(in srgb,var(--coral) 22%,var(--card));color:var(--ink);border-color:color-mix(in srgb,var(--coral) 40%,var(--line))}
+#schedule .schedule-redesign-head{margin-bottom:8px}
+#schedule .schedule-day-panel{margin-top:8px}
+#schedule .schedule-summary .summary-dayline p{font-variant-numeric:tabular-nums;direction:ltr}
+#schedule .schedule-summary .summary-count{white-space:nowrap}
+#schedule .schedule-summary .summary-current,#schedule .schedule-summary .summary-next{margin-top:3px}
+#schedule .schedule-date-chip{cursor:pointer}
+@media(max-width:900px){
+ #schedule .schedule-summary{display:grid;grid-template-columns:1fr auto;gap:5px 12px}
+ #schedule .schedule-summary .summary-dayline{grid-column:1/-1}
+ #schedule .schedule-summary .summary-progress{grid-column:1/-1}
+ #schedule .schedule-summary .summary-current,#schedule .schedule-summary .summary-next{font-size:.82rem}
+}
