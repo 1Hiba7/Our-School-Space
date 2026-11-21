@@ -287,3 +287,20 @@ body{font-family:"IBM Plex Sans Arabic",sans-serif;background:var(--paper);color
  #home .metric{grid-template-columns:minmax(0,1fr) 38px!important}
  #home .metric:before{width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important}
 }
+
+
+/* Guest banner: preserve natural Arabic line flow and keep actions grouped */
+.guest-banner{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;flex-wrap:wrap!important;min-width:0}
+.guest-banner .guest-message{display:block;flex:1 1 300px;min-width:0;white-space:normal!important;word-break:normal!important;overflow-wrap:break-word!important;line-height:1.65}
+.guest-banner .guest-actions{display:flex!important;flex:0 0 auto!important;flex-direction:row!important;align-items:center;gap:7px!important;white-space:nowrap!important}
+@media(max-width:700px){
+ .guest-banner{flex-direction:column!important;align-items:stretch!important;gap:9px!important}
+ .guest-banner .guest-message{width:100%;flex:0 0 auto;min-width:0;font-size:.9rem;line-height:1.55}
+ .guest-banner .guest-actions{width:100%;display:flex!important;flex-direction:row!important;flex-wrap:nowrap!important}
+ .guest-banner .guest-actions .btn{flex:1 1 0;min-width:0;white-space:nowrap;padding-inline:8px}
+}
+@media(min-width:701px) and (max-width:1034px){
+ #home .metric{box-sizing:border-box!important;padding-inline:16px!important}
+ #home .metric:before{justify-self:center!important;margin-inline:5px!important}
+ #home .metric .eyebrow,#home .metric>strong,#home .metric>p,#home .metric>.progress{min-width:0}
+}
