@@ -150,3 +150,76 @@ body{font-family:"IBM Plex Sans Arabic",sans-serif;background:var(--paper);color
  #schedule .schedule-summary .summary-progress{grid-column:1/-1}
  #schedule .schedule-summary .summary-current,#schedule .schedule-summary .summary-next{font-size:.82rem}
 }
+
+/* Responsive refinements — visitor banner, dashboard, schedule and calendar */
+.guest-banner{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;flex-wrap:nowrap!important}
+.guest-banner>span:first-child{flex:1;min-width:0}
+.guest-banner .guest-actions{display:flex;flex:0 0 auto;gap:7px;white-space:nowrap}
+#home>#remindersBox{grid-column:1/-1!important;width:100%;grid-template-columns:repeat(2,minmax(0,1fr))}
+#home>#remindersBox>div{grid-column:1/-1}
+#home>#remindersBox .card{width:100%;margin:0!important}
+#home .metric{position:relative;overflow:hidden!important;min-width:0}
+#home .metric:before{grid-column:2;grid-row:1/5;position:relative;inset:auto!important;justify-self:end}
+#home .metric:after{position:absolute!important;left:25px!important;right:auto!important;top:50%!important;transform:translateY(-50%);width:66px;height:66px;display:grid!important;place-items:center;pointer-events:none}
+#home .metric:has(.progress):after{display:none!important}
+#home .lesson{overflow:hidden;padding-inline-start:16px;padding-inline-end:72px}
+#home .lesson:before{left:12px;top:50%;transform:translateY(-50%);width:44px;height:44px}
+#home .lesson:after{left:23px;top:50%;transform:translateY(-50%);font-size:21px}
+#home>#latestAnnouncement{position:relative;overflow:hidden;padding-inline-start:108px!important}
+#home>#latestAnnouncement:after{left:16px!important;right:auto!important;top:50%!important;transform:translateY(-50%);width:72px;height:72px;display:grid;place-items:center}
+#home #homeNotice{position:relative;z-index:2}
+#schedule .schedule-summary{margin-bottom:12px}
+#schedule .schedule-day-panel{gap:14px}
+.timeline-card{min-width:0}
+.timeline-card h3{overflow-wrap:anywhere}
+@media(min-width:600px) and (max-width:1034px){
+ .guest-banner{padding:10px 12px!important}
+ .guest-banner>span:first-child{font-size:.88rem}
+ .guest-banner .btn{padding:8px 10px;font-size:.84rem}
+ #home>.hero{min-height:0!important;padding:16px!important}
+ #home>.grid.metrics{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px}
+ #home .metric{padding:11px 10px!important;grid-template-columns:minmax(0,1fr) 42px!important;min-height:100px}
+ #home .metric:before{width:38px!important;height:38px!important;border-radius:12px!important}
+ #home .metric:after{left:12px!important;font-size:21px!important}
+ #home .metric strong{font-size:1rem}
+ #home .metric p{font-size:.72rem}
+ #home>#liveCard{grid-column:span 6!important}
+ #home>#remindersBox{grid-column:span 6!important}
+ #home>#latestAnnouncement{grid-column:span 5!important}
+}
+@media(max-width:706px){
+ #home>#latestAnnouncement{padding-inline-start:86px!important}
+ #home>#latestAnnouncement:after{width:58px;height:58px;left:10px!important;font-size:28px}
+ #home #homeNotice{margin-top:8px;position:relative;z-index:3}
+}
+@media(max-width:600px){
+ .guest-banner{align-items:center!important;gap:8px!important;padding:10px!important}
+ .guest-banner>span:first-child{font-size:.78rem;line-height:1.45}
+ .guest-banner .guest-actions{gap:5px}
+ .guest-banner .btn{padding:7px 8px;font-size:.74rem}
+ #home>.grid.metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #home .metric{grid-template-columns:minmax(0,1fr) 38px!important;padding:12px!important}
+ #home .metric:before{width:36px!important;height:36px!important}
+ #home .metric:after{left:11px!important;font-size:20px!important}
+ #home>#remindersBox{grid-column:1/-1!important}
+ #home>#liveCard{grid-column:1/-1!important}
+ #home>#latestAnnouncement{grid-column:1/-1!important}
+ #home>#todayLessons{grid-template-columns:1fr!important}
+ #schedule .schedule-day-panel{gap:12px}
+ #schedule .schedule-timeline{gap:5px}
+ #schedule .timeline-row{grid-template-columns:48px 14px minmax(0,1fr);gap:5px;min-height:70px}
+ #schedule .timeline-time{font-size:.66rem;padding-top:12px}
+ #schedule .timeline-card{grid-template-columns:32px minmax(0,1fr);gap:7px;padding:8px 9px;border-radius:12px}
+ #schedule .timeline-subject-icon{width:31px;height:31px;border-radius:10px;font-size:17px}
+ #schedule .timeline-card h3{font-size:.82rem}
+ #schedule .timeline-card p{font-size:.68rem}
+ #schedule .timeline-state{grid-column:2;font-size:.64rem}
+ #schedule .schedule-summary{padding:12px}
+}
+@media(max-width:478px){
+ #calendar .calendar,#cal.calendar{grid-template-columns:repeat(7,minmax(0,1fr))!important;gap:2px!important;width:100%;min-width:0!important}
+ #cal .cal-day,#cal button,#cal>div{min-width:0!important;max-width:100%;padding:3px 1px!important;overflow:hidden;font-size:.72rem}
+ #cal .cal-head,#cal .calendar-head{min-width:0!important;padding:4px 0!important;font-size:.58rem;white-space:nowrap}
+ #cal .tag,#cal small{font-size:.5rem!important;white-space:nowrap}
+ .calendar.grid{grid-template-columns:repeat(7,minmax(0,1fr))!important;gap:2px!important}
+}
