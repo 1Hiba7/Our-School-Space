@@ -355,3 +355,15 @@ body{font-family:"IBM Plex Sans Arabic",sans-serif;background:var(--paper);color
  #home .metric:before{width:66px!important;height:66px!important;min-width:66px!important;min-height:66px!important;border-radius:20px!important;justify-self:center!important;margin:0!important}
  #home .metric>*{min-width:0}
 }
+
+
+/* Brand-safe accent palette selector */
+.palette-setting{display:grid;gap:10px;padding:14px 0;border-bottom:1px solid var(--line)}
+.palette-setting .tiny{margin:4px 0 0}
+.palette-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.palette-choice{display:flex;align-items:center;justify-content:center;gap:7px;flex-direction:column;min-width:0;padding:10px 5px;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);transition:border-color .2s,transform .2s,box-shadow .2s}
+.palette-choice>span{width:30px;height:30px;border-radius:50%;border:3px solid color-mix(in srgb,var(--card) 85%,transparent);box-shadow:0 0 0 1px var(--line)}
+.palette-choice small{font-size:.72rem;white-space:nowrap}
+.palette-choice.active{border:2px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 13%,transparent);transform:translateY(-2px)}
+.palette-choice:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+@media(max-width:480px){.palette-options{grid-template-columns:repeat(2,minmax(0,1fr))}.palette-choice{flex-direction:row;justify-content:flex-start;padding:9px 12px}}
