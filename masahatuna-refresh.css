@@ -367,3 +367,5 @@ body{font-family:"IBM Plex Sans Arabic",sans-serif;background:var(--paper);color
 .palette-choice.active{border:2px solid var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 13%,transparent);transform:translateY(-2px)}
 .palette-choice:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 @media(max-width:480px){.palette-options{grid-template-columns:repeat(2,minmax(0,1fr))}.palette-choice{flex-direction:row;justify-content:flex-start;padding:9px 12px}}
+
+.lesson-editor-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:end}.lesson-editor-row .btn{margin-bottom:8px;white-space:nowrap}#customDaysPanel{display:flex;flex-wrap:wrap;gap:8px;padding:8px 0}@media(max-width:520px){.lesson-editor-row{grid-template-columns:minmax(0,1fr) auto;gap:6px}.lesson-editor-row .btn{padding:8px;font-size:.82rem}}
