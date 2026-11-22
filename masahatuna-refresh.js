@@ -13,16 +13,23 @@ function dataForDay(d){var day=dayName(d),date=iso(d),att=attendance(day,date);r
 function setMode(v){mode=v;render()}
 function build(){
  var sec=$('schedule');if(!sec||$('scheduleRedesignHead'))return;
+ var hero=sec.querySelector('.hero'),strip=$('scheduleDateStrip'),notice=$('scheduleNotice'),tools=sec.querySelector('.sched-tools'),month=$('monthView');
  var head=document.createElement('div');head.className='schedule-redesign-head';head.id='scheduleRedesignHead';
  head.innerHTML='<div><p class="eyebrow">خطتكِ الدراسية</p><h1>جدول الحصص</h1></div><div class="schedule-tabs" role="tablist" aria-label="طريقة عرض الجدول"><button type="button" data-mode="day" class="active" aria-selected="true">اليوم</button><button type="button" data-mode="week" aria-selected="false">الأسبوع</button><button type="button" data-mode="month" aria-selected="false">الشهر</button></div>';
- var strip=document.createElement('div');strip.id='scheduleDateStrip';strip.className='schedule-date-strip';
  var panel=document.createElement('div');panel.id='scheduleDayPanel';panel.className='schedule-day-panel';
  var timeline=document.createElement('div');timeline.id='scheduleTimeline';timeline.className='schedule-timeline';
  var summary=document.createElement('aside');summary.id='scheduleSummary';summary.className='schedule-summary';panel.append(timeline,summary);
- var month=document.createElement('div');month.id='scheduleMonthPanel';month.hidden=true;
- var actions=document.createElement('div');actions.className='schedule-redesign-actions';actions.innerHTML='<button type="button" class="btn secondary" id="scheduleExportBtn">تنزيل الجدول</button><button type="button" class="btn secondary" id="schedulePrintAction">طباعة الجدول</button>';head.appendChild(actions);var hero=sec.querySelector('.hero');if(hero)hero.after(head,strip,panel,month);
- var notice=$('scheduleNotice');if(notice)panel.before(notice);
- head.querySelectorAll('[data-mode]').forEach(function(b){b.addEventListener('click',function(){setMode(b.dataset.mode)})});$('scheduleExportBtn').addEventListener('click',function(){exportScheduleImage()});$('schedulePrintAction').addEventListener('click',function(){printSchedule()});
+ if(month){month.id='scheduleMonthPanel';month.hidden=true}
+ if(hero)hero.after(head);
+ if(strip)head.after(strip);
+ if(tools&&strip)strip.after(tools);
+ if(notice&&tools)tools.after(notice);
+ if(notice)notice.after(panel);
+ else if(tools)tools.after(panel);
+ if(month)panel.after(month);
+ var legacyDay=$('lessonsView');if(legacyDay)legacyDay.classList.add('hidden');
+ if(tools){var oldSwitch=tools.querySelector('.view-switch');if(oldSwitch)oldSwitch.hidden=true}
+ head.querySelectorAll('[data-mode]').forEach(function(b){b.addEventListener('click',function(){setMode(b.dataset.mode)})});
 }
 function renderStrip(){
  var root=$('scheduleDateStrip');if(!root)return;var start=new Date(selected);start.setDate(start.getDate()-3);root.innerHTML='';
@@ -51,15 +58,18 @@ function render(){
  var dayPanel=$('scheduleDayPanel');if(dayPanel&&mode==='day'){dayPanel.classList.remove('fade-in');void dayPanel.offsetWidth;dayPanel.classList.add('fade-in')}
  $('scheduleRedesignHead').querySelectorAll('[data-mode]').forEach(function(b){var active=b.dataset.mode===mode;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false')});
  var isDay=mode==='day',isWeek=mode==='week',isMonth=mode==='month';
- $('scheduleDateStrip').hidden=false;$('scheduleDayPanel').hidden=!isDay;$('scheduleMonthPanel').hidden=!isMonth;
+ $('scheduleDateStrip').hidden=!isDay;$('scheduleDayPanel').hidden=!isDay;$('scheduleMonthPanel').hidden=!isMonth;
  $('weekView').classList.toggle('hidden',!isWeek);
+ $('lessonsView').classList.add('hidden');$('monthView').classList.add('hidden');
  renderStrip();if(isDay)renderTimeline();if(isMonth)renderMonth();if(isWeek)renderSchedule();
 }
 function fab(){if($('taskFab'))return;var b=document.createElement('button');b.id='taskFab';b.type='button';b.className='task-fab';b.textContent='+';b.title='إضافة مهمة';b.setAttribute('aria-label','إضافة مهمة جديدة');b.addEventListener('click',function(){openTask()});document.body.appendChild(b);var add=$('tasks')&&$('tasks').querySelector('.hero button[onclick*="openTask"]');if(add)add.hidden=true}
 function decorateLessons(){['todayLessons','weekView','lessonsView','teachers'].forEach(function(id){var root=$(id);if(!root)return;root.querySelectorAll('.lesson,.cell,.soft').forEach(function(el){var target=el.querySelector('.sub')||el.querySelector('div[style*="font-size"]')||el.querySelector('strong');if(!target)return;var raw=target.textContent.trim(),label=formalSubject(raw);if(label!==raw)target.textContent=label;var p=palette[raw]||palette[label]||['#E8EAF6','📚'];el.style.setProperty('--lesson-color',p[0]);el.dataset.subjectIcon=p[1]})})}
 function boot(){
- fab();decorateLessons();
+ build();fab();decorateLessons();render();
  if($('home')&&window.MutationObserver)new MutationObserver(decorateLessons).observe($('home'),{childList:true,subtree:true});
+ if(timer)clearInterval(timer);
+ timer=setInterval(function(){if($('schedule')&&!$('schedule').classList.contains('hidden')&&mode==='day'&&iso(selected)===iso(new Date()))renderTimeline()},30000);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
