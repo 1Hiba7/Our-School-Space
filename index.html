@@ -287,6 +287,20 @@ body{letter-spacing:.005em;background:var(--paper)}
 <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="masahatuna-refresh.css"></head>
 <body>
 <div id="splash"><img src="Our-School-Space2.png" onerror="this.onerror=null;this.src='Our-School-Space.png'" alt=""><p>مساحتنا المدرسية</p><i class="sp-dots"><b></b><b></b><b></b></i></div>
+<script>
+/* مستقل عن تهيئة التطبيق: لا تترك شاشة البداية تحجب الموقع عند حدوث خطأ لاحق */
+(function(){
+  function dismissSplash(){
+    var splash=document.getElementById('splash');
+    if(!splash)return;
+    splash.classList.add('out');
+    setTimeout(function(){if(splash.parentNode)splash.parentNode.removeChild(splash)},650);
+  }
+  setTimeout(dismissSplash,1400);
+  window.addEventListener('error',function(){setTimeout(dismissSplash,0)},{once:true});
+  window.addEventListener('unhandledrejection',function(){setTimeout(dismissSplash,0)},{once:true});
+})();
+</script>
 <div class="app">
 <header class="topbar"><div class="topbar-inner">
 <button class="icon-btn menu-btn" onclick="toggleMenu()" aria-label="القائمة">☰</button><div id="navOverlay" class="nav-overlay" onclick="toggleMenu(false)"></div><button class="brand" onclick="go('home')"><span class="brand-icon"><img src="Our-School-Space.png" alt="شعار" onerror="this.replaceWith('🌷')"></span><span><strong>مساحتنا المدرسية</strong><small>عاشر - د · أبو علي إياد · قلقيلية</small></span></button>
