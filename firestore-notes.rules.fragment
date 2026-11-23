@@ -1,0 +1,45 @@
+// FIRESTORE SECURITY RULES — NOTES SUBCOLLECTION FRAGMENT
+// Merge this match block into the EXISTING firestore.rules file inside:
+// match /databases/{database}/documents { ... }
+// Do NOT replace your current rules with this fragment alone.
+//
+// Important: Firestore grants access if ANY matching allow rule grants it.
+// Review existing wildcard rules for /users/{userId}/{document=**}; a broader
+// allow can override the protection below and must be narrowed accordingly.
+
+match /users/{userId}/notes/{noteId} {
+  function isOwner() {
+    return request.auth != null && request.auth.uid == userId;
+  }
+
+  allow read: if isOwner();
+
+  allow create: if isOwner()
+    && request.resource.data.ownerUid == userId
+    && request.resource.data.keys().hasOnly([
+      'ownerUid', 'title', 'body', 'category', 'pinned', 'createdAt', 'updatedAt'
+    ])
+    && request.resource.data.title is string
+    && request.resource.data.title.size() <= 140
+    && request.resource.data.body is string
+    && request.resource.data.body.size() <= 100000
+    && request.resource.data.category is string
+    && request.resource.data.category.size() <= 40
+    && request.resource.data.pinned is bool;
+
+  allow update: if isOwner()
+    && resource.data.ownerUid == userId
+    && request.resource.data.ownerUid == userId
+    && request.resource.data.keys().hasOnly([
+      'ownerUid', 'title', 'body', 'category', 'pinned', 'createdAt', 'updatedAt'
+    ])
+    && request.resource.data.title is string
+    && request.resource.data.title.size() <= 140
+    && request.resource.data.body is string
+    && request.resource.data.body.size() <= 100000
+    && request.resource.data.category is string
+    && request.resource.data.category.size() <= 40
+    && request.resource.data.pinned is bool;
+
+  allow delete: if isOwner() && resource.data.ownerUid == userId;
+}
