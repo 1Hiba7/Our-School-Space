@@ -45,7 +45,7 @@ function renderTimeline(){
 
 }
 function renderMonth(){
- var root=$('scheduleMonthPanel'),y=selected.getFullYear(),m=selected.getMonth(),first=new Date(y,m,1).getDay(),count=new Date(y,m+1,0).getDate(),heads=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+ var root=$('scheduleMonthPanel');if(!root)return;root.hidden=false;root.classList.remove('hidden');var y=selected.getFullYear(),m=selected.getMonth(),first=new Date(y,m,1).getDay(),count=new Date(y,m+1,0).getDate(),heads=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
  var html='<div class="section-head"><button class="btn secondary" id="monthPrev">‹ السابق</button><h2 class="section-title">'+monthName(selected)+'</h2><button class="btn secondary" id="monthNext">التالي ›</button></div><div class="schedule-month-grid">'+heads.map(function(x){return '<div class="cal-head">'+x+'</div>'}).join('');
  for(var i=0;i<first;i++)html+='<div></div>';
  for(var d=1;d<=count;d++){var date=new Date(y,m,d,12),key=iso(date),a=attendance(dayName(date),key);html+='<button class="schedule-month-day '+(key===iso(new Date())?'today ':'')+(key===iso(selected)?'selected':'')+'" data-day="'+key+'">'+d+'<small>'+(a.working?'دوام':'عطلة')+'</small></button>'}
@@ -58,7 +58,9 @@ function render(){
  var dayPanel=$('scheduleDayPanel');if(dayPanel&&mode==='day'){dayPanel.classList.remove('fade-in');void dayPanel.offsetWidth;dayPanel.classList.add('fade-in')}
  $('scheduleRedesignHead').querySelectorAll('[data-mode]').forEach(function(b){var active=b.dataset.mode===mode;b.classList.toggle('active',active);b.setAttribute('aria-selected',active?'true':'false')});
  var isDay=mode==='day',isWeek=mode==='week',isMonth=mode==='month';
- $('scheduleDateStrip').hidden=!isDay;$('scheduleDayPanel').hidden=!isDay;$('scheduleMonthPanel').hidden=!isMonth;
+ $('scheduleDateStrip').hidden=!isDay;$('scheduleDateStrip').classList.toggle('hidden',!isDay);
+ $('scheduleDayPanel').hidden=!isDay;$('scheduleDayPanel').classList.toggle('hidden',!isDay);
+ var monthPanel=$('scheduleMonthPanel');if(monthPanel){monthPanel.hidden=!isMonth;monthPanel.classList.toggle('hidden',!isMonth)}
  $('weekView').classList.toggle('hidden',!isWeek);
  var legacyDay=$('lessonsView'),legacyMonth=$('monthView');if(legacyDay)legacyDay.classList.add('hidden');if(legacyMonth)legacyMonth.classList.add('hidden');
  renderStrip();if(isDay)renderTimeline();if(isMonth)renderMonth();if(isWeek)renderSchedule();
