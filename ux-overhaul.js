@@ -3,8 +3,8 @@
 (function(){
 'use strict';
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
-const icons={home:'house',schedule:'calendar-days',calendar:'calendar-range',tasks:'list-checks',activities:'images',info:'megaphone',books:'book-open',family:'users',tools:'wrench',settings:'sliders-horizontal',guide:'map-pin',admin:'shield'};
-const paths={home:'الرئيسية',schedule:'الجدول',calendar:'التقويم',tasks:'المهام',activities:'أنشطتنا',info:'الإعلانات',books:'الكتب',family:'الأسرة الصفية',tools:'الأدوات',settings:'الإعدادات',guide:'دليل الموقع',admin:'الإدارة'};
+const icons={home:'house',schedule:'calendar-days',calendar:'calendar-range',tasks:'list-checks',notes:'book-open',activities:'images',info:'megaphone',books:'book-open',family:'users',tools:'wrench',settings:'sliders-horizontal',guide:'map-pin',admin:'shield'};
+const paths={home:'الرئيسية',schedule:'الجدول',calendar:'التقويم',tasks:'المهام',notes:'ملاحظاتي',activities:'أنشطتنا',info:'الإعلانات',books:'الكتب',family:'الأسرة الصفية',tools:'الأدوات',settings:'الإعدادات',guide:'دليل الموقع',admin:'الإدارة'};
 function svg(name){const common='width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';const p={
 house:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
 'calendar-days':'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/>',
@@ -135,7 +135,7 @@ function start(){
  if(!uid){stop();root.innerHTML='<div class="empty">الملاحظات الشخصية تتطلب تسجيل الدخول، وهي غير متاحة في وضع الزائرة.<br><button class="btn primary" onclick="showAuth(\'login\')">تسجيل الدخول</button></div>';return}
  if(!cloud||typeof db==='undefined'||!db){root.innerHTML='<div class="notice">تعذر الاتصال الآمن بالمزامنة. لم يتم حفظ الملاحظات محلياً.</div>';return}
  if(notesUid===uid&&notesUnsub){renderList();return}
- stop();notesUid=uid;root.innerHTML='<div class="empty">جارٍ تحميل ملاحظاتك الخاصة…</div>';
+ stop();delete root.dataset.uxNotesReady;notesUid=uid;root.innerHTML='<div class="empty">جارٍ تحميل ملاحظاتك الخاصة…</div>';
  notesUnsub=db.collection('users').doc(uid).collection('notes').onSnapshot(snap=>{
   notes=snap.docs.map(d=>({id:d.id,...d.data()}));
   if(activeNote&&!notes.some(n=>n.id===activeNote))activeNote=null;
