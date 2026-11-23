@@ -88,6 +88,7 @@ function installSettings(){
  if(typeof window.renderSettings!=='function'||window.renderSettings.__uxWrapped)return;
  const base=window.renderSettings;
  const wrapped=function(){
+  const before=$('#settingsBox');if(before)delete before.dataset.uxCategories;
   base();
   const box=$('#settingsBox');if(!box||box.dataset.uxCategories)return;
   const cards=Array.from(box.children).filter(x=>x.tagName==='SECTION');
