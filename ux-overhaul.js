@@ -17,6 +17,7 @@ users:'<path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 
 wrench:'<path d="M14.7 6.3a5 5 0 0 0-6.4 6.4L3 18l3 3 5.3-5.3a5 5 0 0 0 6.4-6.4L14 12l-2-2z"/>',
 'sliders-horizontal':'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M2 14h4M10 8h4M18 16h4"/>',
 'map-pin':'<path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/>',
+search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
 shield:'<path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/>'
 };return '<svg '+common+'>'+ (p[name]||p.house)+'</svg>'}
 function labelize(b,id){const t=(b.textContent||paths[id]||id).trim();b.textContent='';const ic=document.createElement('span');ic.className='ux-nav-icon';ic.innerHTML=svg(icons[id]||'house');const l=document.createElement('span');l.className='ux-nav-label';l.textContent=t;b.append(ic,l);b.dataset.uxTitle=t;b.title=t;b.setAttribute('aria-label',t)}
@@ -34,7 +35,7 @@ function initShell(){
  try{if(localStorage.getItem('masahatuna-sidebar-collapsed')==='1'){aside.classList.add('collapsed');app.classList.add('ux-collapsed')}}catch(e){}
  const actions=$('.top-actions');if(actions){
   const search=document.createElement('button');search.type='button';search.className='ux-search-trigger';search.title='بحث موحّد';search.setAttribute('aria-label','بحث موحّد');search.innerHTML=svg('search');search.addEventListener('click',openSearch);actions.prepend(search);
-  const account=$('#accountName');if(account){account.classList.add('ux-account');account.setAttribute('aria-label','الحساب والملف الشخصي');account.title='الملف الشخصي';const setAvatar=()=>{const name=(window.user&&user()?.name)||'';account.textContent=name?name.trim().split(/\s+/).slice(0,2).map(x=>x[0]).join(''):'؟'};setAvatar();new MutationObserver(setAvatar).observe(account,{childList:true,characterData:true,subtree:true})}
+  const account=$('#accountName');if(account){account.classList.add('ux-account');account.setAttribute('aria-label','الحساب والملف الشخصي');account.title='الملف الشخصي';const setAvatar=()=>{const name=(typeof user==='function'&&user()?.name)||'';account.textContent=name?name.trim().split(/\s+/).slice(0,2).map(x=>x[0]).join(''):'؟'};setAvatar();new MutationObserver(setAvatar).observe(account,{childList:true,characterData:true,subtree:true})}
  }
  const mobile=document.createElement('nav');mobile.className='ux-mobile-nav';mobile.setAttribute('aria-label','التنقل السريع');
  const items=[['home','الرئيسية'],['schedule','الجدول'],['tasks','المهام'],['calendar','التقويم']];
@@ -48,13 +49,13 @@ let layer=null,filter='all';
 function searchable(){
  const out=[];const add=(arr,type,section,titleKey,descKey)=>{(Array.isArray(arr)?arr:[]).forEach(x=>{const title=x[titleKey]||x.title||x.name;if(!title)return;out.push({id:x.id,title:String(title),desc:String(x[descKey]||x.content||x.subject||''),type,section})})};
  const me=window.user&&user();
- add(window.data?.tasks?.filter(t=>me&&t.profileId===me.id),'المهام','tasks','title','subject');
- add(window.data?.announcements,'الإعلانات','info','title','content');
- add(window.data?.projects,'الأنشطة','activities','title','description');
- add(window.data?.activities,'الأنشطة','activities','title','description');
- add(window.data?.events,'التقويم','calendar','title','description');
- add(window.data?.books,'الكتب','books','title','description');
- add(window.data?.links,'الأدوات','tools','title','description');
+ add(typeof data!=='undefined'?data.tasks.filter(t=>me&&t.profileId===me.id):[],'المهام','tasks','title','subject');
+ add(typeof data!=='undefined'?data.announcements:[],'الإعلانات','info','title','content');
+ add(typeof data!=='undefined'?data.projects:[],'الأنشطة','activities','title','description');
+ add(typeof data!=='undefined'?data.activities:[],'الأنشطة','activities','title','description');
+ add(typeof data!=='undefined'?data.events:[],'التقويم','calendar','title','description');
+ add(typeof data!=='undefined'?data.books:[],'الكتب','books','title','description');
+ add(typeof data!=='undefined'?data.links:[],'الأدوات','tools','title','description');
  return out;
 }
 function openSearch(){
