@@ -80,3 +80,45 @@ function improveTaskToolbar(){
 function start(){initShell();improveTaskToolbar();const taskRoot=$('#taskList');if(taskRoot)new MutationObserver(improveTaskToolbar).observe(taskRoot,{childList:true,subtree:true});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 })();
+
+/* Settings: category navigation, admin directory and accessible toggles */
+(function(){
+const $=s=>document.querySelector(s);
+function installSettings(){
+ if(typeof window.renderSettings!=='function'||window.renderSettings.__uxWrapped)return;
+ const base=window.renderSettings;
+ const wrapped=function(){
+  base();
+  const box=$('#settingsBox');if(!box||box.dataset.uxCategories)return;
+  const cards=Array.from(box.children).filter(x=>x.tagName==='SECTION');
+  if(!cards.length)return;
+  const names=['الإشعارات والأصوات','المظهر وسهولة القراءة','التطبيق'];
+  const tabs=document.createElement('div');tabs.className='ux-settings-tabs';
+  cards.forEach((card,i)=>{const b=document.createElement('button');b.type='button';b.textContent=names[i]||('إعدادات '+(i+1));b.addEventListener('click',()=>select(i));tabs.append(b);card.classList.add('ux-settings-card')});
+  box.prepend(tabs);
+  const extra=document.createElement('section');extra.className='card ux-accessibility-extra';extra.innerHTML='<h3>إمكانية الوصول</h3><div class="ux-access-actions"><button type="button" data-font="-">تصغير الخط</button><button type="button" data-font="+">تكبير الخط</button><button type="button" data-font="0">الحجم الافتراضي</button></div><label class="ux-setting-toggle"><span>تقليل الحركة والانتقالات</span><input type="checkbox" id="uxReduceMotion"></label>';
+  box.append(extra);
+  extra.querySelectorAll('[data-font]').forEach(b=>b.addEventListener('click',()=>{const n=b.dataset.font;const v=n==='0'?100:Math.max(85,Math.min(150,(Number(prefs.font)||100)+(n==='+'?5:-5)));setFont(v);const r=box.querySelector('input[type="range"]');if(r)r.value=v}));
+  const rm=extra.querySelector('#uxReduceMotion');try{rm.checked=localStorage.getItem('masahatuna-reduce-motion')==='1'}catch(e){};document.documentElement.classList.toggle('ux-reduce-motion',rm.checked);rm.addEventListener('change',()=>{document.documentElement.classList.toggle('ux-reduce-motion',rm.checked);try{localStorage.setItem('masahatuna-reduce-motion',rm.checked?'1':'0')}catch(e){}});
+  function select(i){cards.forEach((c,n)=>c.hidden=n!==i);tabs.querySelectorAll('button').forEach((b,n)=>b.classList.toggle('active',n===i));extra.hidden=i!==1;try{localStorage.setItem('masahatuna-settings-tab',String(i))}catch(e){}}
+  let initial=0;try{initial=Math.max(0,Math.min(cards.length-1,Number(localStorage.getItem('masahatuna-settings-tab'))||0))}catch(e){};select(initial);box.dataset.uxCategories='1';
+ };
+ wrapped.__uxWrapped=true;window.renderSettings=wrapped;
+}
+function installAdmin(){
+ if(typeof window.renderAdmin!=='function'||window.renderAdmin.__uxWrapped)return;
+ const base=window.renderAdmin;
+ const wrapped=function(){
+  base();const panel=$('#adminPanel');if(!panel||panel.classList.contains('hidden')||panel.querySelector('.ux-admin-directory'))return;
+  const tabs=Array.from(panel.querySelectorAll('.admin-tab'));if(!tabs.length)return;
+  const names={overview:['نظرة عامة','ملخص حالة المنصة والإدارة'],notifications:['الإشعارات','إدارة التنبيهات والإعلانات'],users:['حسابات الطالبات','متابعة حسابات الطالبات'],supervisors:['المشرفات والصلاحيات','تعيين الأدوار وتحديد الصلاحيات'],schedule:['الجدول والدوام','إدارة الجداول وأيام الدوام والاستثناءات'],projects:['معرض المشاريع','متابعة المشاريع والمشاركات'],accounts:['الحسابات والأدوار','إدارة الحسابات والأدوار'],exams:['رزنامة الامتحانات','تنظيم مواعيد الامتحانات'],content:['الكتب والروابط والأسرة','إدارة محتوى الصف والخدمات']};
+  const grid=document.createElement('div');grid.className='ux-admin-directory';
+  tabs.forEach(t=>{const m=(t.getAttribute('onclick')||'').match(/adminTab\('([^']+)'\)/);if(!m)return;const key=m[1],info=names[key]||[t.textContent.trim(),'إدارة هذا القسم'];const b=document.createElement('button');b.type='button';b.className='ux-admin-card';b.innerHTML='<span class="ux-admin-icon">'+({overview:'◫',notifications:'◉',users:'♙',supervisors:'♧',schedule:'▦',projects:'▧',accounts:'◎',exams:'◷',content:'▤'}[key]||'◇')+'</span><strong>'+info[0]+'</strong><small>'+info[1]+'</small><span class="ux-admin-arrow">←</span>';b.addEventListener('click',()=>{window.adminTab(key);grid.classList.add('is-collapsed');let back=panel.querySelector('.ux-admin-back');if(!back){back=document.createElement('button');back.className='btn secondary ux-admin-back';back.textContent='← جميع أقسام الإدارة';back.addEventListener('click',()=>{grid.classList.remove('is-collapsed');back.remove()});panel.insertBefore(back,panel.querySelector('.admin-panel'))}});grid.append(b)});
+  panel.insertBefore(grid,panel.firstChild);
+ };
+ wrapped.__uxWrapped=true;window.renderAdmin=wrapped;
+}
+function boot(){installSettings();installAdmin();if(typeof window.renderSettings==='function'&&$('#settings')&&!$('#settings').classList.contains('hidden'))window.renderSettings();if(typeof window.renderAdmin==='function'&&$('#admin')&&!$('#admin').classList.contains('hidden'))window.renderAdmin()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+const mo=new MutationObserver(()=>{installSettings();installAdmin()});if(document.body)mo.observe(document.body,{childList:true,subtree:true});
+})();
