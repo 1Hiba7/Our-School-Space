@@ -485,3 +485,16 @@ body{font-family:"IBM Plex Sans Arabic",sans-serif;background:var(--paper);color
 @media(max-width:760px){.ux-notes-layout{grid-template-columns:1fr}.ux-notes-list{order:2}.ux-note-editor{order:1;min-height:350px}.ux-note-body{min-height:220px}.ux-admin-directory{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:440px){.ux-admin-directory{grid-template-columns:1fr}.ux-admin-card{min-height:80px}}
 .ux-reduce-motion *,html.ux-reduce-motion *{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+
+.ux-sidebar #mainNav button:before{content:none!important;display:none!important}
+.ux-sidebar #mainNav button .ux-nav-icon{display:inline-flex;width:22px;min-width:22px;justify-content:center}
+.ux-sidebar.collapsed #mainNav button .ux-nav-label{display:none!important}
+.ux-sidebar.collapsed #mainNav button .ux-nav-icon{width:24px;min-width:24px}
+@media(max-width:900px){
+ .ux-sidebar #mainNav{position:static!important;inset:auto!important;transform:none!important;width:auto!important;height:auto!important;max-height:none!important;overflow:visible!important;display:flex!important;flex-direction:column!important;background:transparent!important;box-shadow:none!important;border:0!important;padding:0!important}
+ .ux-sidebar #mainNav button{display:flex!important;min-height:44px!important}
+ .ux-sidebar #mainNav button .ux-nav-label{display:inline!important}
+ .ux-sidebar.collapsed{width:min(300px,84vw);padding:22px 12px}
+ .ux-sidebar.collapsed .ux-side-brand strong{display:block}
+ .ux-sidebar.collapsed #mainNav button .ux-nav-label{display:inline!important}
+}
