@@ -75,7 +75,7 @@ function escHtml(v){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&l
 function improveTaskToolbar(){
  const bar=$('#taskList .sel-bar');if(!bar||bar.dataset.uxReady)return;bar.dataset.uxReady='1';
  const count=bar.querySelector('strong');if(count)count.textContent=count.textContent.replace('تم تحديد','محدد');
- bar.setAttribute('role','toolbar');bar.setAttribute('aria-label','إجراءات المهام المحددة');
+ bar.setAttribute('role','toolbar');bar.setAttribute('aria-label','إجراءات المهام المحددة');const toggle=document.createElement('button');toggle.type='button';toggle.className='ux-toolbar-toggle';toggle.textContent='تصغير';toggle.setAttribute('aria-expanded','true');toggle.addEventListener('click',()=>{bar.classList.toggle('ux-collapsed');const closed=bar.classList.contains('ux-collapsed');toggle.textContent=closed?'توسيع':'تصغير';toggle.setAttribute('aria-expanded',String(!closed))});bar.append(toggle);
 }
 function start(){initShell();improveTaskToolbar();const taskRoot=$('#taskList');if(taskRoot)new MutationObserver(improveTaskToolbar).observe(taskRoot,{childList:true,subtree:true});}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
