@@ -227,7 +227,7 @@ function renderListCardsOnly(){const list=$('#uxNoteList');if(!list)return;const
 async function createNote(){
  if(!owner()||owner()!==notesUid)return;const btn=$('#uxNewNote');if(btn)btn.disabled=true;
  const id=typeof uid==='function'?uid('note'):('note_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)),now=Date.now();
- try{await db.collection('users').doc(notesUid).collection('notes').doc(id).set({ownerUid:notesUid,title:'',body:'',category:'',color:'#FFFFFF',pinned:false,createdAt:now,updatedAt:now});activeNote=id;editing=true;history=[];historyAt=-1}
+ try{await db.collection('users').doc(notesUid).collection('notes').doc(id).set({ownerUid:notesUid,title:'',body:'',category:'',color:'#FFFFFF',pinned:false,createdAt:now,updatedAt:now});activeNote=id;editing=true;openDetailRequested=true;history=[];historyAt=-1}
  catch(e){toast(e&&e.code==='permission-denied'?'قواعد Firestore تمنع إنشاء الملاحظات حالياً.':'تعذر إنشاء الملاحظة.');}
  finally{if(btn)btn.disabled=false}
 }
