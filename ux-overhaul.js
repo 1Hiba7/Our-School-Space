@@ -30,21 +30,31 @@ function initShell(){
  Array.from(nav.querySelectorAll('[data-nav]')).forEach(b=>labelize(b,b.dataset.nav));
  if(settings)bottom.append(settings);if(admin)bottom.append(admin);
  aside.append(nav,bottom);
- const collapse=document.createElement('button');collapse.type='button';collapse.className='ux-collapse';collapse.innerHTML='⇤ <span class="ux-label">طيّ الشريط</span>';collapse.title='طيّ أو توسيع الشريط';collapse.addEventListener('click',()=>{aside.classList.toggle('collapsed');app.classList.toggle('ux-collapsed',aside.classList.contains('collapsed'));try{localStorage.setItem('masahatuna-sidebar-collapsed',aside.classList.contains('collapsed')?'1':'0')}catch(e){}});aside.append(collapse);
+ const collapse=document.createElement('button');collapse.type='button';collapse.className='ux-collapse';collapse.innerHTML='';collapse.title='';collapse.setAttribute('aria-label','طي الشريط');collapse.addEventListener('click',()=>{aside.classList.toggle('collapsed');app.classList.toggle('ux-collapsed',aside.classList.contains('collapsed'));try{localStorage.setItem('masahatuna-sidebar-collapsed',aside.classList.contains('collapsed')?'1':'0')}catch(e){}});aside.append(collapse);
  head.after(aside);
  try{if(localStorage.getItem('masahatuna-sidebar-collapsed')==='1'){aside.classList.add('collapsed');app.classList.add('ux-collapsed')}}catch(e){}
  const actions=$('.top-actions');if(actions){
   const search=document.createElement('button');search.type='button';search.className='ux-search-trigger';search.title='بحث موحّد';search.setAttribute('aria-label','بحث موحّد');search.innerHTML=svg('search');search.addEventListener('click',openSearch);actions.prepend(search);
   const account=$('#accountName');if(account){account.classList.add('ux-account');account.setAttribute('aria-label','الحساب والملف الشخصي');account.title='الملف الشخصي';const setAvatar=()=>{const name=(typeof user==='function'&&user()?.name)||'';const avatar=name?name.trim().split(/\s+/).slice(0,2).map(x=>x[0]).join(''):'؟';if(account.textContent!==avatar)account.textContent=avatar};setAvatar();new MutationObserver(setAvatar).observe(account,{childList:true,characterData:true,subtree:true})}
  }
+
  const mobile=document.createElement('nav');mobile.className='ux-mobile-nav';mobile.setAttribute('aria-label','التنقل السريع');
  const items=[['home','الرئيسية'],['schedule','الجدول'],['tasks','المهام'],['calendar','التقويم']];
- items.forEach(([id,title])=>{const b=document.createElement('button');b.type='button';b.dataset.mobileNav=id;b.dataset.icon='';b.innerHTML=svg(icons[id])+'<span>'+title+'</span>';b.addEventListener('click',()=>window.go(id));mobile.append(b)});
- const more=document.createElement('button');more.type='button';more.className='ux-more';more.innerHTML='<span>المزيد</span>';more.addEventListener('click',()=>window.toggleMenu());mobile.append(more);document.body.append(mobile);
- const syncActive=()=>{const active=nav.querySelector('[data-nav].active')?.dataset.nav;mobile.querySelectorAll('[data-mobile-nav]').forEach(b=>b.classList.toggle('active',b.dataset.mobileNav===active));const staff=!!(window.isStaff&&isStaff());const ab=nav.querySelector('[data-nav="admin"]');if(ab)ab.classList.toggle('hidden',!staff)};
+ items.forEach(([id,title])=>{const b=document.createElement('button');b.type='button';b.dataset.mobileNav=id;b.innerHTML=svg(icons[id])+'<span>'+title+'</span>';b.addEventListener('click',()=>window.go(id));mobile.append(b)});
+ const more=document.createElement('button');more.type='button';more.className='ux-more';more.innerHTML=svg('list-checks')+'<span>المزيد</span>';mobile.append(more);document.body.append(mobile);
+ const moreMenu=document.createElement('div');moreMenu.className='ux-more-menu';moreMenu.setAttribute('role','menu');moreMenu.setAttribute('aria-label','بقية أقسام الموقع');
+ Array.from(nav.querySelectorAll('[data-nav]')).filter(b=>!['home','schedule','tasks','calendar'].includes(b.dataset.nav)).forEach(source=>{const id=source.dataset.nav,title=paths[id]||source.textContent.trim(),b=document.createElement('button');b.type='button';b.dataset.moreNav=id;b.innerHTML=svg(icons[id]||'house')+'<span>'+title+'</span>';b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();moreMenu.classList.remove('open');window.go(id)});moreMenu.append(b)});
+ document.body.append(moreMenu);
+ const syncActive=()=>{const active=nav.querySelector('[data-nav].active')?.dataset.nav;mobile.querySelectorAll('[data-mobile-nav]').forEach(b=>b.classList.toggle('active',b.dataset.mobileNav===active));moreMenu.querySelectorAll('[data-more-nav]').forEach(b=>b.classList.toggle('active',b.dataset.moreNav===active));const staff=!!(window.isStaff&&isStaff());const ab=moreMenu.querySelector('[data-more-nav="admin"]');if(ab)ab.classList.toggle('hidden',!staff);const sourceAdmin=nav.querySelector('[data-nav="admin"]');if(sourceAdmin)sourceAdmin.classList.toggle('hidden',!staff)};
  new MutationObserver(syncActive).observe(nav,{subtree:true,attributes:true,attributeFilter:['class']});syncActive();
- window.toggleMenu=function(force){const open=force===undefined?!aside.classList.contains('open'):!!force;aside.classList.toggle('open',open);const overlay=$('#navOverlay');if(overlay){overlay.classList.toggle('show',open);overlay.style.display=open?'block':''}document.body.classList.toggle('ux-menu-open',open)};
- // Floating create menu: keep the action clear of the fixed sidebar and mobile navigation.
+ const toggleMore=force=>{const open=force===undefined?!moreMenu.classList.contains('open'):!!force;moreMenu.classList.toggle('open',open);more.setAttribute('aria-expanded',String(open))};
+ more.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();toggleMore()});
+ document.addEventListener('click',e=>{if(!moreMenu.contains(e.target)&&!more.contains(e.target))toggleMore(false)});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')toggleMore(false)});
+ window.toggleMenu=toggleMore;
+ const hamburger=$('.topbar .menu-btn');if(hamburger)hamburger.remove();const overlay=$('#navOverlay');if(overlay)overlay.remove();
+ // Floating create menu: single entry point for task and note creation.
+ document.querySelectorAll('#home .hero button[onclick*="openTask"],#tasks .hero button[onclick*="openTask"]').forEach(b=>b.remove());
  if(!$('#uxCreateFab')){
   const fab=document.createElement('button');fab.id='uxCreateFab';fab.type='button';fab.className='task-fab';fab.setAttribute('aria-label','إنشاء جديد');fab.setAttribute('aria-expanded','false');fab.innerHTML='<span aria-hidden="true">+</span>';document.body.append(fab);
   const menu=document.createElement('div');menu.id='uxCreateMenu';menu.className='ux-create-menu';menu.hidden=true;menu.innerHTML='<button type="button" data-create="task">＋ إنشاء مهمة</button><button type="button" data-create="note">▤ إنشاء ملاحظة</button>';document.body.append(menu);
