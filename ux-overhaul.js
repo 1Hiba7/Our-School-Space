@@ -148,7 +148,7 @@ const mo=new MutationObserver(()=>{installSettings();installAdmin()});if(documen
 /* Private notes — private per-user Firestore collection, read-only preview and explicit editing. */
 (function(){
 const $=s=>document.querySelector(s);
-let notes=[],notesUid=null,notesUnsub=null,activeNote=null,saveTimer=null,notesQuery='',sortMode='updated',editing=false,history=[],historyAt=-1,notesReady=false;
+let notes=[],notesUid=null,notesUnsub=null,activeNote=null,saveTimer=null,notesQuery='',sortMode='updated',editing=false,history=[],historyAt=-1,notesReady=false,openDetailRequested=false;
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const owner=()=>typeof auth!=='undefined'&&auth?.currentUser?auth.currentUser.uid:null;
 const plain=html=>{const d=document.createElement('div');d.innerHTML=html||'';return (d.innerText||d.textContent||'').replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim()};
@@ -165,7 +165,7 @@ function start(){
  notesUnsub=db.collection('users').doc(uid).collection('notes').onSnapshot(snap=>{
   notes=snap.docs.map(d=>({id:d.id,...d.data()}));
   if(activeNote&&!notes.some(n=>n.id===activeNote)){activeNote=null;editing=false}
-  if(!activeNote&&notes.length)activeNote=sorted()[0].id;
+  if(!activeNote&&notes.length&&window.matchMedia('(min-width: 901px)').matches)activeNote=sorted()[0].id;
   if(!notesReady){notesReady=true;renderApp()}else{renderList()}
  },err=>{root.innerHTML='<div class="notice">'+(err&&err.code==='permission-denied'?'قواعد Firestore لا تسمح بالوصول إلى ملاحظاتك.':'تعذر تحميل الملاحظات. تحققي من الاتصال والصلاحيات.')+'</div>'});
 }
@@ -183,30 +183,33 @@ function renderList(){
  const catBox=$('#uxNoteCategories');if(catBox)catBox.innerHTML='<button type="button" data-cat="">الكل</button>'+cats.map(c=>'<button type="button" data-cat="'+esc(c)+'">'+esc(c)+'</button>').join('')+'<button type="button" id="uxAddCategory">＋ تصنيف</button>';
  catBox?.querySelectorAll('[data-cat]').forEach(b=>b.addEventListener('click',()=>{notesQuery=b.dataset.cat;$('#uxNoteSearch').value=notesQuery;renderList()}));
  $('#uxAddCategory')?.addEventListener('click',()=>{const c=prompt('اسم التصنيف الجديد');if(!c?.trim())return;const n=notes.find(x=>x.id===activeNote);if(n){n.category=c.trim();saveMeta(n,{category:n.category})}else toast('أنشئي ملاحظة أولاً ثم اختاري تصنيفها.')});
- list.innerHTML=arr.length?arr.map(n=>'<button type="button" class="ux-note-card '+(n.id===activeNote?'active':'')+'" data-note="'+esc(n.id)+'" style="--note-bg:'+safeColor(n.color)+'"><strong>'+(n.pinned?'◆ ':'')+esc(n.title||'ملاحظة بلا عنوان')+'</strong><span class="ux-note-preview">'+esc(plain(n.body).slice(0,110)||'لا يوجد محتوى بعد')+'</span><small>أُنشئت: '+stamp(n.createdAt)+'</small><small>آخر تعديل: '+stamp(n.updatedAt)+'</small>'+(n.category?'<em>'+esc(n.category)+'</em>':'')+'</button>').join(''):'<div class="empty">لا توجد ملاحظات بعد. أنشئي ملاحظتك الأولى.</div>';
- list.querySelectorAll('[data-note]').forEach(b=>b.addEventListener('click',()=>{flushSave();activeNote=b.dataset.note;editing=false;renderList();renderEditor()}));
+ list.innerHTML=arr.length?arr.map(n=>'<button type="button" class="ux-note-card '+(n.id===activeNote?'active':'')+'" data-note="'+esc(n.id)+'" style="--note-bg:'+safeColor(n.color)+';--note-ink:'+noteInk(n.color)+'"><strong>'+(n.pinned?'◆ ':'')+esc(n.title||'ملاحظة بلا عنوان')+'</strong><span class="ux-note-preview">'+esc(plain(n.body).slice(0,110)||'لا يوجد محتوى بعد')+'</span><small>أُنشئت: '+stamp(n.createdAt)+'</small><small>آخر تعديل: '+stamp(n.updatedAt)+'</small>'+(n.category?'<em>'+esc(n.category)+'</em>':'')+'</button>').join(''):'<div class="empty">لا توجد ملاحظات بعد. أنشئي ملاحظتك الأولى.</div>';
+ list.querySelectorAll('[data-note]').forEach(b=>b.addEventListener('click',()=>{flushSave();activeNote=b.dataset.note;editing=false;openDetailRequested=true;renderList();renderEditor()}));
  renderEditor();
 }
-function safeColor(c){return /^#[0-9a-f]{6}$/i.test(c||'')?c:'var(--card)'}
+function safeColor(c){const allowed=['#F5F1E8','#E7F0FF','#D8CBEA','#B7CDBD','#F7D6CC','#FFFFFF'];const value=String(c||'').toUpperCase();return allowed.includes(value)?value:'#FFFFFF'}
+function noteInk(){return '#26334A'}
+function paletteButtons(current){return [['#F5F1E8','عاجي'],['#E7F0FF','أزرق هادئ'],['#D8CBEA','لافندر'],['#B7CDBD','أخضر هادئ'],['#F7D6CC','مرجاني'],['#FFFFFF','أبيض']].map(([c,n])=>'<button type="button" class="ux-note-swatch" data-note-color="'+c+'" title="'+n+'" aria-label="'+n+'" aria-pressed="'+(safeColor(current)===c)+'" style="background:'+c+'"></button>').join('')}
+function svgPencil(){return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 4 4 4M4 20l4-.8L19 8a2.1 2.1 0 0 0-3-3L5 16z"/></svg>'}
 function renderEditor(){
  const el=$('#uxNoteEditor');if(!el)return;const n=notes.find(x=>x.id===activeNote);
  if(!n){el.innerHTML='<div class="empty">اختاري ملاحظة لعرضها أو أنشئي ملاحظة جديدة.</div>';el.classList.remove('mobile-open');return}
  el.classList.toggle('mobile-open',true);
  if(!editing){
-  el.innerHTML='<div class="ux-note-detail-head"><div><h2>'+esc(n.title||'ملاحظة بلا عنوان')+'</h2><small>أُنشئت '+stamp(n.createdAt)+' · آخر تعديل '+stamp(n.updatedAt)+'</small></div><button type="button" class="btn primary" id="uxEditNote">تعديل</button><button type="button" class="icon-btn" id="uxCloseNote" aria-label="إغلاق">×</button></div><div class="ux-note-read" style="--note-bg:'+safeColor(n.color)+'">'+(sanitize(n.body||'')||'<p class="muted">لا يوجد محتوى بعد.</p>')+'</div><div class="ux-note-detail-actions"><button type="button" class="btn secondary" id="uxPinNote">'+(n.pinned?'إلغاء التثبيت':'تثبيت')+'</button><button type="button" class="btn danger" id="uxDeleteNote">حذف</button></div>';
+  el.innerHTML='<div class="ux-note-detail-head"><div><h2>'+esc(n.title||'ملاحظة بلا عنوان')+'</h2><small>أُنشئت '+stamp(n.createdAt)+' · آخر تعديل '+stamp(n.updatedAt)+'</small></div><button type="button" class="btn primary" id="uxEditNote" class="ux-note-edit-icon" aria-label="تعديل الملاحظة" title="تعديل">'+svgPencil()+'</button><button type="button" class="icon-btn" id="uxCloseNote" aria-label="إغلاق">×</button></div><div class="ux-note-read" style="--note-bg:'+safeColor(n.color)+'">'+(sanitize(n.body||'')||'<p class="muted">لا يوجد محتوى بعد.</p>')+'</div><div class="ux-note-detail-actions"><button type="button" class="btn secondary" id="uxPinNote">'+(n.pinned?'إلغاء التثبيت':'تثبيت')+'</button><button type="button" class="btn danger" id="uxDeleteNote">حذف</button></div>';
   $('#uxEditNote').onclick=()=>{editing=true;history=[];historyAt=-1;renderEditor()};
-  $('#uxCloseNote').onclick=()=>el.classList.remove('mobile-open');
+  $('#uxCloseNote').onclick=()=>{openDetailRequested=false;el.classList.remove('mobile-open')};
   $('#uxPinNote').onclick=()=>updateMeta({pinned:!n.pinned});$('#uxDeleteNote').onclick=deleteNote;return;
  }
  el.innerHTML='<div class="ux-note-detail-head"><input id="uxNoteTitle" maxlength="140" placeholder="عنوان الملاحظة" value="'+esc(n.title||'')+'"><button type="button" class="btn primary" id="uxDoneEdit">تم</button><button type="button" class="icon-btn" id="uxCloseNote" aria-label="إغلاق">×</button></div><div class="ux-note-meta-row"><input id="uxNoteCategory" maxlength="40" placeholder="التصنيف" value="'+esc(n.category||'')+'"><label>خلفية <input id="uxNoteColor" type="color" value="'+safeColor(n.color).replace('var(--card)','#ffffff')+'"></label></div><div class="ux-note-toolbar" role="toolbar" aria-label="تنسيق النص"><button type="button" data-cmd="undo" title="تراجع">↶</button><button type="button" data-cmd="redo" title="إعادة">↷</button><button type="button" data-cmd="bold"><b>B</b></button><button type="button" data-cmd="italic"><i>I</i></button><button type="button" data-cmd="formatBlock" data-value="H2">عنوان</button><button type="button" data-cmd="insertUnorderedList">قائمة</button><button type="button" data-cmd="insertOrderedList">ترقيم</button><button type="button" data-link="1">رابط</button></div><div id="uxNoteBody" class="ux-note-body" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="اكتبي ملاحظتك هنا…">'+sanitize(n.body||'')+'</div><div class="ux-note-status" id="uxNoteStatus">يُحفظ تلقائياً · '+stamp(n.updatedAt)+'</div>';
- const body=$('#uxNoteBody');history=[body.innerHTML];historyAt=0;
+ const body=$('#uxNoteBody');body.style.background=safeColor(n.color);body.style.color=noteInk();history=[body.innerHTML];historyAt=0;
  const push=()=>{const v=body.innerHTML;if(history[historyAt]!==v){history=history.slice(0,historyAt+1);history.push(v);if(history.length>80)history.shift();historyAt=history.length-1}};
  body.addEventListener('input',()=>{push();scheduleSave()});
- $('#uxNoteTitle').addEventListener('input',scheduleSave);$('#uxNoteCategory').addEventListener('input',scheduleSave);$('#uxNoteColor').addEventListener('input',scheduleSave);
+ $('#uxNoteTitle').addEventListener('input',scheduleSave);$('#uxNoteCategory').addEventListener('input',scheduleSave);el.querySelectorAll('[data-note-color]').forEach(b=>b.addEventListener('click',()=>{n.color=b.dataset.noteColor;el.querySelectorAll('[data-note-color]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));body.style.background=n.color;body.style.color=noteInk();scheduleSave()}));
  el.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('click',()=>{body.focus();if(b.dataset.cmd==='undo'||b.dataset.cmd==='redo'){historyAt=Math.max(0,Math.min(history.length-1,historyAt+(b.dataset.cmd==='undo'?-1:1)));body.innerHTML=history[historyAt]||'';scheduleSave();return}document.execCommand(b.dataset.cmd,false,b.dataset.value||null);push();scheduleSave()}));
  el.querySelector('[data-link]').onclick=()=>{const url=prompt('أدخلي رابطاً يبدأ بـ https://');if(!url||!/^https?:\/\//i.test(url))return;body.focus();document.execCommand('createLink',false,url);push();scheduleSave()};
  $('#uxDoneEdit').onclick=async()=>{await flushSave();editing=false;renderList()};
- $('#uxCloseNote').onclick=async()=>{await flushSave();el.classList.remove('mobile-open')};
+ $('#uxCloseNote').onclick=async()=>{await flushSave();openDetailRequested=false;el.classList.remove('mobile-open')};
 }
 function sanitize(html){
  const doc=new DOMParser().parseFromString('<div>'+html+'</div>','text/html'),allowed=new Set(['B','STRONG','I','EM','U','P','BR','UL','OL','LI','H2','H3','BLOCKQUOTE','A']);
@@ -216,15 +219,15 @@ function sanitize(html){
 function scheduleSave(){const st=$('#uxNoteStatus');if(st)st.textContent='جارٍ حفظ التغييرات…';clearTimeout(saveTimer);saveTimer=setTimeout(flushSave,700)}
 async function flushSave(){
  clearTimeout(saveTimer);const n=notes.find(x=>x.id===activeNote);if(!n||!editing||!owner()||owner()!==notesUid)return;
- const title=$('#uxNoteTitle'),body=$('#uxNoteBody'),cat=$('#uxNoteCategory'),color=$('#uxNoteColor');
- if(title)n.title=title.value;if(body)n.body=sanitize(body.innerHTML);if(cat)n.category=cat.value;if(color)n.color=color.value;n.updatedAt=Date.now();
+ const title=$('#uxNoteTitle'),body=$('#uxNoteBody'),cat=$('#uxNoteCategory');
+ if(title)n.title=title.value;if(body)n.body=sanitize(body.innerHTML);if(cat)n.category=cat.value;n.color=safeColor(n.color);n.updatedAt=Date.now();
  try{await db.collection('users').doc(notesUid).collection('notes').doc(n.id).set({ownerUid:notesUid,title:n.title||'',body:n.body||'',category:n.category||'',color:n.color||'#ffffff',pinned:!!n.pinned,createdAt:n.createdAt||Date.now(),updatedAt:n.updatedAt});const st=$('#uxNoteStatus');if(st)st.textContent='تم الحفظ تلقائياً · '+stamp(n.updatedAt);renderListCardsOnly()}catch(e){const st=$('#uxNoteStatus');if(st)st.textContent='تعذر الحفظ؛ تحققي من قواعد Firestore والاتصال.'}
 }
 function renderListCardsOnly(){const list=$('#uxNoteList');if(!list)return;const arr=visible();list.innerHTML=arr.map(n=>'<button type="button" class="ux-note-card '+(n.id===activeNote?'active':'')+'" data-note="'+esc(n.id)+'" style="--note-bg:'+safeColor(n.color)+'"><strong>'+esc(n.title||'ملاحظة بلا عنوان')+'</strong><span class="ux-note-preview">'+esc(plain(n.body).slice(0,110))+'</span><small>آخر تعديل: '+stamp(n.updatedAt)+'</small></button>').join('');list.querySelectorAll('[data-note]').forEach(b=>b.onclick=()=>{flushSave();activeNote=b.dataset.note;editing=false;renderList()})}
 async function createNote(){
  if(!owner()||owner()!==notesUid)return;const btn=$('#uxNewNote');if(btn)btn.disabled=true;
  const id=typeof uid==='function'?uid('note'):('note_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)),now=Date.now();
- try{await db.collection('users').doc(notesUid).collection('notes').doc(id).set({ownerUid:notesUid,title:'',body:'',category:'',color:'#ffffff',pinned:false,createdAt:now,updatedAt:now});activeNote=id;editing=true;history=[];historyAt=-1}
+ try{await db.collection('users').doc(notesUid).collection('notes').doc(id).set({ownerUid:notesUid,title:'',body:'',category:'',color:'#FFFFFF',pinned:false,createdAt:now,updatedAt:now});activeNote=id;editing=true;history=[];historyAt=-1}
  catch(e){toast(e&&e.code==='permission-denied'?'قواعد Firestore تمنع إنشاء الملاحظات حالياً.':'تعذر إنشاء الملاحظة.');}
  finally{if(btn)btn.disabled=false}
 }
@@ -232,7 +235,7 @@ async function updateMeta(patch){const n=notes.find(x=>x.id===activeNote);if(!n)
 async function saveMeta(n,patch){await updateMeta(patch)}
 async function deleteNote(){const n=notes.find(x=>x.id===activeNote);if(!n||!confirm('حذف هذه الملاحظة نهائياً؟'))return;try{await db.collection('users').doc(notesUid).collection('notes').doc(n.id).delete();activeNote=null;editing=false}catch(e){toast('تعذر حذف الملاحظة. تحققي من صلاحيات Firestore.')}}
 function watch(){const page=$('#notes');if(page&&!page.classList.contains('hidden'))start();else if(!owner()&&notesUnsub)stop()}
-function wrapGo(){if(typeof window.go!=='function'||window.go.__notesWrapped)return;const base=window.go;const wrapped=function(id){const r=base.apply(this,arguments);if(id==='notes')setTimeout(start,0);return r};wrapped.__notesWrapped=true;window.go=wrapped}
+function wrapGo(){if(typeof window.go!=='function'||window.go.__notesWrapped)return;const base=window.go;const wrapped=function(id){if(id==='notes'){activeNote=null;editing=false;openDetailRequested=false}const r=base.apply(this,arguments);if(id==='notes')setTimeout(()=>{start();const detail=$('#uxNoteEditor');if(detail)detail.classList.remove('mobile-open')},0);return r};wrapped.__notesWrapped=true;window.go=wrapped}
 function wrapRender(){if(typeof window.render!=='function'||window.render.__notesWrapped)return;const base=window.render;const wrapped=function(){const r=base.apply(this,arguments);setTimeout(watch,0);return r};wrapped.__notesWrapped=true;window.render=wrapped}
 function boot(){wrapGo();wrapRender();watch()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
