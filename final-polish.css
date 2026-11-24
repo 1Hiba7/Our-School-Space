@@ -1,0 +1,47 @@
+
+/* Final polish — 2026-11 */
+.ux-sidebar .ux-side-bottom{display:grid;gap:5px;margin-top:auto;padding:10px;border-top:1px solid var(--line)}
+.ux-sidebar .ux-side-bottom>button,.ux-sidebar .ux-side-bottom #mainNav>button,
+.ux-sidebar #mainNav>button{min-height:42px;border:0;border-radius:12px;background:transparent;color:var(--ink);font:inherit;font-weight:700;display:flex;align-items:center;gap:11px;padding:9px 12px;width:100%;text-align:right}
+.ux-sidebar .ux-side-bottom>button:hover,.ux-sidebar #mainNav>button:hover{background:var(--sky);color:var(--accent2)}
+.ux-sidebar .ux-side-bottom>button.active,.ux-sidebar #mainNav>button.active{background:var(--accent);color:#fff}
+.ux-sidebar.collapsed .ux-side-bottom>button{justify-content:center;padding-inline:4px}
+.ux-sidebar.collapsed .ux-side-bottom>button .ux-nav-label{display:none}
+.ux-sidebar.collapsed .ux-side-bottom>button .ux-nav-icon{margin:0}
+.ux-sidebar #mainNav>button.active .ux-nav-icon svg,
+.ux-mobile-nav button.active svg,.ux-more-menu button.active svg{fill:currentColor;fill-opacity:.16;stroke-width:2.25}
+.ux-mobile-nav{min-height:64px!important;height:auto!important;padding:6px 8px calc(6px + env(safe-area-inset-bottom))!important;gap:3px!important}
+.ux-mobile-nav button{min-height:48px!important;padding:5px 7px!important}
+.ux-more{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.ux-more svg{width:20px;height:20px}
+.ux-more-menu{bottom:calc(76px + env(safe-area-inset-bottom))!important;transform:translateY(8px)}
+.ux-more-menu.open{transform:translateY(0)}
+#uxCreateFab{z-index:245!important;box-shadow:0 8px 24px #0003}
+.ux-create-menu{z-index:246!important;transform-origin:bottom right}
+.ux-create-menu:not([hidden]){display:grid;animation:uxCreateIn .18s cubic-bezier(.2,.8,.2,1) both}
+@keyframes uxCreateIn{from{opacity:0;transform:translateY(9px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.ux-create-menu button{transition:background .15s,transform .15s}
+.ux-create-menu button:hover{transform:translateX(-2px)}
+.ux-floating-selection{position:fixed!important;z-index:230!important;left:50%!important;right:auto!important;bottom:calc(82px + env(safe-area-inset-bottom))!important;transform:translateX(-50%);width:min(720px,calc(100vw - 28px));max-width:720px;box-shadow:0 14px 42px #0003;backdrop-filter:blur(14px);background:color-mix(in srgb,var(--card) 90%,transparent)!important;border:1px solid var(--line);border-radius:16px}
+.ux-floating-selection.ux-collapsed{width:auto;min-width:180px}
+.ux-search-highlight{outline:3px solid var(--accent)!important;outline-offset:3px;transition:outline-color .2s}
+.ux-scoped-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.ux-scoped-filters{display:flex;justify-content:flex-start;margin:8px 0;color:var(--muted);font-size:.9rem}
+.ux-scoped-filters select{margin-inline-start:8px;padding:6px 10px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink)}
+.ux-note-detail[hidden]{display:none!important}
+.ux-note-detail.desktop-open{display:block}
+@media(min-width:901px) and (max-width:1350px){
+ .ux-notes-workspace{grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr)!important;gap:12px!important}
+ .ux-notes-board,.ux-note-detail{min-width:0!important;width:100%!important}
+ .ux-notes-grid{grid-template-columns:repeat(auto-fill,minmax(145px,1fr))!important;gap:9px!important}
+ .ux-notes-toolbar{grid-template-columns:minmax(0,1fr) auto auto!important}
+ .ux-note-detail-head{flex-wrap:nowrap!important}
+ .ux-note-detail-head>div{min-width:0!important}
+ .ux-note-read,.ux-note-body{overflow-wrap:anywhere;min-width:0}
+}
+@media(max-width:900px){
+ .ux-mobile-nav{min-height:60px!important;padding-bottom:calc(5px + env(safe-area-inset-bottom))!important}
+ .ux-floating-selection{bottom:calc(72px + env(safe-area-inset-bottom))!important}
+ #uxCreateFab{bottom:calc(96px + env(safe-area-inset-bottom))!important}
+}
+@media(prefers-reduced-motion:reduce){.ux-create-menu:not([hidden]),.ux-create-menu button{animation:none!important;transition:none!important}}
