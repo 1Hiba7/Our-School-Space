@@ -101,3 +101,12 @@ function boot(){
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
+/* Reopen desktop note detail when a note card is selected after closing it. */
+(function(){
+ const list=document.getElementById('uxNoteList'),detail=document.getElementById('uxNoteEditor');
+ if(!list||!detail)return;
+ list.addEventListener('click',e=>{
+  if(!e.target.closest('[data-note]'))return;
+  requestAnimationFrame(()=>{detail.hidden=false;detail.classList.add('desktop-open')});
+ });
+})();
