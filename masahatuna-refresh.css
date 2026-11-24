@@ -507,3 +507,64 @@ body{font-family:"IBM Plex Sans Arabic",sans-serif;background:var(--paper);color
 #settingsBox .set-row input[type="checkbox"]:after{content:"";position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0002;transition:transform .18s}
 #settingsBox .set-row input[type="checkbox"]:checked:after{transform:translateX(-18px)}
 #settingsBox .set-row input[type="checkbox"]:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 35%,transparent);outline-offset:3px}
+
+
+/* Final refinements: compact collapsed controls, safe floating create menu, note cards. */
+.ux-sidebar.collapsed .ux-side-bottom .ux-nav-label{display:none!important}
+.ux-sidebar.collapsed .ux-side-bottom button{justify-content:center;min-width:0;padding-inline:5px}
+.ux-sidebar.collapsed .ux-collapse{font-size:0;width:100%;display:grid;place-items:center}
+.ux-sidebar.collapsed .ux-collapse:before{content:"⇥";font-size:20px;line-height:1}
+.ux-sidebar.collapsed .ux-collapse .ux-label{display:none!important}
+.ux-sidebar .ux-collapse{font-size:0;display:grid;place-items:center}
+.ux-sidebar .ux-collapse:before{content:"⇤";font-size:20px;line-height:1}
+.ux-sidebar .ux-collapse:hover:after{content:attr(title);position:absolute;right:calc(100% + 8px);padding:6px 9px;border-radius:8px;background:var(--ink);color:var(--paper);font-size:12px;white-space:nowrap;z-index:200}
+#uxCreateFab{right:calc(var(--ux-sidebar,244px) + 22px);bottom:24px;z-index:75}
+.app.ux-collapsed #uxCreateFab{right:98px}
+.ux-create-menu{position:fixed;z-index:76;right:calc(var(--ux-sidebar,244px) + 28px);bottom:96px;display:grid;gap:7px;padding:8px;border:1px solid var(--line);border-radius:15px;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(14px);box-shadow:0 12px 32px #0002}
+.app.ux-collapsed .ux-create-menu{right:104px}
+.ux-create-menu[hidden]{display:none!important}
+.ux-create-menu button{border:0;border-radius:10px;background:var(--sky);color:var(--accent2);padding:10px 14px;text-align:right;white-space:nowrap;font-weight:750}
+#uxCreateFab.is-open{transform:rotate(45deg)}
+.ux-notes-toolbar{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.ux-notes-toolbar input{flex:1;min-width:180px;padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--ink)}
+.ux-notes-toolbar select{border:1px solid var(--line);border-radius:11px;padding:10px 12px;background:var(--sky);color:var(--accent2);font:inherit}
+.ux-notes-workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,.85fr);gap:14px;align-items:start}
+.ux-notes-board,.ux-note-detail{min-width:0}
+.ux-notes-categories{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.ux-notes-categories button{border:1px solid var(--line);background:var(--card);color:var(--accent2);border-radius:999px;padding:6px 12px}
+.ux-notes-categories button:hover{background:var(--sky)}
+.ux-notes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:11px}
+.ux-note-card{min-width:0;min-height:160px;display:flex;flex-direction:column;gap:8px;text-align:right;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--note-bg,var(--card));color:var(--ink);box-shadow:0 5px 16px #0000000a}
+.ux-note-card.active{outline:2px solid var(--accent);outline-offset:1px}
+.ux-note-card strong{font-size:1rem;overflow-wrap:anywhere}
+.ux-note-card .ux-note-preview{font-size:.88rem;line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;white-space:pre-wrap}
+.ux-note-card small{font-size:.72rem;color:var(--muted)}
+.ux-note-card em{font-size:.75rem;color:var(--accent2);font-style:normal;margin-top:auto}
+.ux-note-detail{display:none;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:15px;min-height:320px}
+.ux-note-detail:not(:empty){display:block}
+.ux-note-detail-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.ux-note-detail-head>div{flex:1;min-width:160px}
+.ux-note-detail-head h2{margin:0 0 4px;font-size:1.1rem}
+.ux-note-detail-head small{color:var(--muted);font-size:.75rem}
+.ux-note-read{min-height:200px;padding:14px;border-radius:13px;background:var(--note-bg,var(--paper));line-height:1.65;overflow-wrap:anywhere;white-space:normal}
+.ux-note-read p{margin:0 0 .65em;line-height:1.65}
+.ux-note-read p:last-child{margin-bottom:0}
+.ux-note-read ul,.ux-note-read ol{padding-inline-start:1.5em}
+.ux-note-detail-actions{display:flex;gap:8px;margin-top:12px}
+.ux-note-meta-row{display:flex;gap:9px;align-items:center;margin-bottom:8px}
+.ux-note-meta-row>input{flex:1}
+.ux-note-meta-row label{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.ux-note-meta-row input[type=color]{width:42px;height:38px;padding:2px}
+.ux-note-body{white-space:normal;line-height:1.65}
+.ux-note-body p{margin:0 0 .65em;line-height:1.65}
+.ux-note-body p:last-child{margin-bottom:0}
+.ux-note-body ul,.ux-note-body ol{padding-inline-start:1.5em}
+@media(max-width:900px){
+ #uxCreateFab{right:18px;bottom:calc(88px + env(safe-area-inset-bottom));z-index:125}
+ .ux-create-menu{right:18px;bottom:calc(158px + env(safe-area-inset-bottom));z-index:126}
+ .ux-notes-workspace{grid-template-columns:1fr}
+ .ux-note-detail{display:none}
+ .ux-note-detail.mobile-open{display:block;position:fixed;z-index:180;inset:12px 10px calc(84px + env(safe-area-inset-bottom));overflow:auto;box-shadow:0 20px 70px #0004}
+ .ux-notes-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+}
+@media(max-width:420px){.ux-notes-toolbar select{max-width:132px}.ux-note-card{min-height:145px;padding:11px}}
