@@ -138,7 +138,7 @@ const mo=new MutationObserver(()=>{installSettings();installAdmin()});if(documen
 /* Private notes — private per-user Firestore collection, read-only preview and explicit editing. */
 (function(){
 const $=s=>document.querySelector(s);
-let notes=[],notesUid=null,notesUnsub=null,activeNote=null,saveTimer=null,notesQuery='',sortMode='updated',editing=false,history=[],historyAt=-1;
+let notes=[],notesUid=null,notesUnsub=null,activeNote=null,saveTimer=null,notesQuery='',sortMode='updated',editing=false,history=[],historyAt=-1,notesReady=false;
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const owner=()=>typeof auth!=='undefined'&&auth?.currentUser?auth.currentUser.uid:null;
 const plain=html=>{const d=document.createElement('div');d.innerHTML=html||'';return (d.innerText||d.textContent||'').replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim()};
@@ -151,12 +151,12 @@ function start(){
  if(!uid){stop();root.innerHTML='<div class="empty">الملاحظات الشخصية تتطلب تسجيل الدخول، وهي غير متاحة في وضع الزائرة.<br><button class="btn primary" onclick="showAuth(\'login\')">تسجيل الدخول</button></div>';return}
  if(!cloud||typeof db==='undefined'||!db){root.innerHTML='<div class="notice">تعذر الاتصال الآمن بالمزامنة. لم يتم حفظ الملاحظات محلياً.</div>';return}
  if(notesUid===uid&&notesUnsub){renderList();return}
- stop();notesUid=uid;root.innerHTML='<div class="empty">جارٍ تحميل ملاحظاتك الخاصة…</div>';
+ stop();notesUid=uid;notesReady=false;root.innerHTML='<div class="empty">جارٍ تحميل ملاحظاتك الخاصة…</div>';
  notesUnsub=db.collection('users').doc(uid).collection('notes').onSnapshot(snap=>{
   notes=snap.docs.map(d=>({id:d.id,...d.data()}));
   if(activeNote&&!notes.some(n=>n.id===activeNote)){activeNote=null;editing=false}
   if(!activeNote&&notes.length)activeNote=sorted()[0].id;
-  renderApp();
+  if(!notesReady){notesReady=true;renderApp()}else{renderList()}
  },err=>{root.innerHTML='<div class="notice">'+(err&&err.code==='permission-denied'?'قواعد Firestore لا تسمح بالوصول إلى ملاحظاتك.':'تعذر تحميل الملاحظات. تحققي من الاتصال والصلاحيات.')+'</div>'});
 }
 function renderApp(){
