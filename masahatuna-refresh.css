@@ -563,7 +563,7 @@ body{font-family:"IBM Plex Sans Arabic",sans-serif;background:var(--paper);color
  #uxCreateFab{right:18px;bottom:calc(88px + env(safe-area-inset-bottom));z-index:125}
  .ux-create-menu{right:18px;bottom:calc(158px + env(safe-area-inset-bottom));z-index:126}
  .ux-notes-workspace{grid-template-columns:1fr}
- .ux-note-detail{display:none}
+ .ux-note-detail:not(.mobile-open){display:none}
  .ux-note-detail.mobile-open{display:block;position:fixed;z-index:180;inset:12px 10px calc(84px + env(safe-area-inset-bottom));overflow:auto;box-shadow:0 20px 70px #0004}
  .ux-notes-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
 }
