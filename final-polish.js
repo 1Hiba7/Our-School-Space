@@ -120,3 +120,19 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   requestAnimationFrame(()=>{detail.hidden=false;detail.classList.add('desktop-open')});
  });
 })();
+
+/* Keep each section's own search controls visible; remove redundant reveal buttons. */
+(function(){
+ function revealLocalSearch(){
+  document.querySelectorAll('.section-search-toggle').forEach(b=>b.remove());
+  ['activityFilter','bookFilters','taskSearchWrap','infoBar'].forEach(id=>{
+   const el=document.getElementById(id);if(el)el.classList.remove('hidden');
+  });
+  const info=document.getElementById('infoFilter');
+  if(info){const bar=info.querySelector('#infoBar');if(bar)bar.classList.remove('hidden')}
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(revealLocalSearch,0),{once:true});
+ else setTimeout(revealLocalSearch,0);
+ const mo=new MutationObserver(revealLocalSearch);
+ if(document.body)mo.observe(document.body,{childList:true,subtree:true});
+})();
