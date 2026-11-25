@@ -80,18 +80,28 @@ function scopedSearch(){
   layer.innerHTML='<section class="ux-search-dialog" role="dialog" aria-modal="true" aria-label="البحث في '+title+'"><div class="ux-scoped-head"><strong>البحث في '+title+'</strong><button type="button" class="icon-btn" data-close aria-label="إغلاق">×</button></div><input type="search" placeholder="اكتبي كلمة للبحث..." autocomplete="off"><div class="ux-scoped-filters"><label>تصفية النتائج <select aria-label="نوع المحتوى"><option value="all">الكل</option><option value="text">يحتوي على نص</option></select></label></div><div class="ux-search-results"><p class="muted">اكتبي كلمة للبحث داخل هذا القسم فقط.</p></div></section>';
   document.body.append(layer);const input=layer.querySelector('input'),box=layer.querySelector('.ux-search-results');
   const close=()=>layer.remove();layer.querySelector('[data-close]').onclick=close;layer.addEventListener('click',ev=>{if(ev.target===layer)close()});
-  const candidates=()=>Array.from(root.querySelectorAll('.task,.activity,.project-card,.notice-card,.book-card,[data-task-id],[data-id]')).filter(el=>!el.closest('.hero')&&!el.closest('.section-head'));
+  const normalize=v=>String(v||'').normalize('NFKC').toLocaleLowerCase('ar').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/[ًٌٍَُِّْـ]/g,'').replace(/\s+/g,' ').trim();
+  const candidates=()=>Array.from(root.querySelectorAll('article,.task,.activity,.activity-card,.project-card,.notice-card,.book-card,.book,[data-task-id],[data-id]')).filter(el=>!el.closest('.hero')&&!el.closest('.section-head')&&!el.closest('#uxScopedSearch')&&!el.classList.contains('empty')&&el.innerText.trim().length>8);
   input.addEventListener('input',()=>{
-   const q=input.value.trim().toLocaleLowerCase('ar');if(!q){box.innerHTML='<p class="muted">اكتبي كلمة للبحث داخل هذا القسم فقط.</p>';return}
-   const matches=candidates().filter(el=>el.innerText.toLocaleLowerCase('ar').includes(q)).slice(0,30);
+   const q=normalize(input.value);if(!q){box.innerHTML='<p class="muted">اكتبي كلمة للبحث داخل هذا القسم فقط.</p>';return}
+   const matches=candidates().filter(el=>normalize(el.innerText).includes(q)).slice(0,30);
    box.innerHTML=matches.length?matches.map((el,i)=>'<button type="button" class="ux-search-result" data-match="'+i+'"><span><strong>'+String(el.innerText.trim().slice(0,95)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+'</strong></span><span>↙</span></button>').join(''):'<div class="empty">لا توجد نتائج في هذا القسم.</div>';
    box.querySelectorAll('[data-match]').forEach(b=>b.onclick=()=>{matches[+b.dataset.match].scrollIntoView({behavior:'smooth',block:'center'});matches[+b.dataset.match].classList.add('ux-search-highlight');setTimeout(()=>matches[+b.dataset.match].classList.remove('ux-search-highlight'),1200);close()});
   });
   layer.addEventListener('keydown',ev=>{if(ev.key==='Escape')close()});input.focus();
  },true);
 }
+function polishNoteActions(){
+ const root=$('#notesApp');if(!root||root.dataset.iconActions)return;root.dataset.iconActions='1';
+ const draw=()=>{
+  const pin=$('#uxPinNote'),del=$('#uxDeleteNote');
+  if(pin&&!pin.dataset.iconOnly){pin.dataset.iconOnly='1';pin.title=pin.textContent.trim();pin.setAttribute('aria-label',pin.title);pin.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 3 5 5-4 1-4 5-1 6-2-2-2-2 6-1 5-4z"/><path d="m5 19 4-4"/></svg>';}
+  if(del&&!del.dataset.iconOnly){del.dataset.iconOnly='1';del.title='حذف الملاحظة';del.setAttribute('aria-label','حذف الملاحظة');del.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6m4 4v6m6-6v6"/></svg>';}
+ }
+ draw();new MutationObserver(draw).observe(root,{childList:true,subtree:true});
+}
 function layout(){
- polishNav();polishCreate();polishNotes();polishToolbar();
+ polishNav();polishCreate();polishNotes();polishToolbar();polishNoteActions();
 }
 function boot(){
  layout();scopedSearch();
