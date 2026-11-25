@@ -45,3 +45,43 @@
  #uxCreateFab{bottom:calc(96px + env(safe-area-inset-bottom))!important}
 }
 @media(prefers-reduced-motion:reduce){.ux-create-menu:not([hidden]),.ux-create-menu button{animation:none!important;transition:none!important}}
+
+
+/* Final requested fixes: anchored More menu, single More glyph, local search and section order */
+.ux-mobile-nav .ux-more:before{content:none!important;display:none!important}
+.ux-more-menu{z-index:260!important}
+.ux-more-menu.open{display:grid!important}
+#uxCreateFab[style*="visibility: hidden"]{pointer-events:none!important}
+#taskFab{display:none!important}
+.ux-notes-toolbar{width:100%;display:grid!important;grid-template-columns:minmax(260px,1fr) auto auto!important;align-items:center;gap:10px!important}
+.ux-notes-toolbar input{width:100%!important;min-width:0!important}
+.ux-note-detail-actions button{min-width:40px;min-height:38px;padding:8px!important;display:inline-grid;place-items:center}
+.ux-note-detail-actions button svg{display:block}
+.ux-reorder-section{padding:16px;margin-top:12px}
+.ux-reorder-list{list-style:none;margin:12px 0;padding:0;display:grid;gap:7px}
+.ux-reorder-list li{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--line);border-radius:12px;background:var(--card);touch-action:pan-y}
+.ux-reorder-list li.dragging{opacity:.5;border-style:dashed}
+.ux-reorder-list li>span:nth-child(2){flex:1;font-weight:700}
+.ux-reorder-grip{color:var(--muted);font-size:1.2rem;cursor:grab}
+.ux-reorder-list button{width:34px;height:34px;border:1px solid var(--line);border-radius:9px;background:var(--sky);color:var(--accent2)}
+.ux-reorder-list button:disabled{opacity:.35;cursor:not-allowed}
+.ux-reorder-section[hidden]{display:none!important}
+.section-search-toggle{display:none!important}
+#activityFilter.hidden,#bookFilters.hidden,#taskSearchWrap.hidden,#infoBar.hidden{display:grid!important}
+#activityFilter,#bookFilters,#taskSearchWrap,#infoBar{margin:12px 0;grid-template-columns:minmax(220px,1fr) repeat(4,minmax(110px,auto));gap:9px;align-items:center;padding:12px}
+#taskSearchWrap input{width:100%}
+@media(min-width:901px){
+ .ux-notes-toolbar{grid-template-columns:minmax(380px,1fr) auto auto!important}
+ #activityFilter .pf-q,#bookFilters .pf-q,#infoBar .pf-q{min-width:280px}
+}
+@media(max-width:900px){
+ .ux-notes-toolbar{grid-template-columns:minmax(0,1fr) auto auto!important}
+ #activityFilter,#bookFilters,#taskSearchWrap,#infoBar{grid-template-columns:1fr 1fr;gap:8px}
+ #activityFilter .pf-q,#bookFilters .pf-q,#infoBar .pf-q,#taskSearchWrap input{grid-column:1/-1}
+ .ux-more-menu{max-height:min(65vh,520px)}
+}
+@media(max-width:520px){
+ .ux-notes-toolbar{grid-template-columns:minmax(0,1fr) auto!important}
+ .ux-notes-toolbar input{grid-column:1/-1}
+ .ux-notes-toolbar select,.ux-notes-toolbar #uxNewNote{width:100%;max-width:none}
+}
