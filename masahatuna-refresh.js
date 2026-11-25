@@ -65,7 +65,7 @@ function render(){
  var legacyDay=$('lessonsView'),legacyMonth=$('monthView');if(legacyDay)legacyDay.classList.add('hidden');if(legacyMonth)legacyMonth.classList.add('hidden');
  renderStrip();if(isDay)renderTimeline();if(isMonth)renderMonth();if(isWeek)renderSchedule();
 }
-function fab(){if($('taskFab'))return;var b=document.createElement('button');b.id='taskFab';b.type='button';b.className='task-fab';b.textContent='+';b.title='إضافة مهمة';b.setAttribute('aria-label','إضافة مهمة جديدة');b.addEventListener('click',function(){openTask()});document.body.appendChild(b);var add=$('tasks')&&$('tasks').querySelector('.hero button[onclick*="openTask"]');if(add)add.hidden=true}
+function fab(){var legacy=$('taskFab');if(legacy)legacy.remove();var add=$('tasks')&&$('tasks').querySelector('.hero button[onclick*="openTask"]');if(add)add.remove()}
 function decorateLessons(){['todayLessons','weekView','lessonsView','teachers'].forEach(function(id){var root=$(id);if(!root)return;root.querySelectorAll('.lesson,.cell,.soft').forEach(function(el){var target=el.querySelector('.sub')||el.querySelector('div[style*="font-size"]')||el.querySelector('strong');if(!target)return;var raw=target.textContent.trim(),label=formalSubject(raw);if(label!==raw)target.textContent=label;var p=palette[raw]||palette[label]||['#E8EAF6','📚'];el.style.setProperty('--lesson-color',p[0]);el.dataset.subjectIcon=p[1]})})}
 function boot(){
  build();fab();decorateLessons();render();
