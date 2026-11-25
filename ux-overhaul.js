@@ -47,8 +47,21 @@ function initShell(){
  document.body.append(moreMenu);
  const syncActive=()=>{const active=nav.querySelector('[data-nav].active')?.dataset.nav;mobile.querySelectorAll('[data-mobile-nav]').forEach(b=>b.classList.toggle('active',b.dataset.mobileNav===active));moreMenu.querySelectorAll('[data-more-nav]').forEach(b=>b.classList.toggle('active',b.dataset.moreNav===active));const staff=!!(window.isStaff&&isStaff());const ab=moreMenu.querySelector('[data-more-nav="admin"]');if(ab)ab.classList.toggle('hidden',!staff);const sourceAdmin=nav.querySelector('[data-nav="admin"]');if(sourceAdmin)sourceAdmin.classList.toggle('hidden',!staff)};
  new MutationObserver(syncActive).observe(nav,{subtree:true,attributes:true,attributeFilter:['class']});syncActive();
- const toggleMore=force=>{const open=force===undefined?!moreMenu.classList.contains('open'):!!force;moreMenu.classList.toggle('open',open);more.setAttribute('aria-expanded',String(open))};
+ const positionMoreMenu=()=>{
+  const r=more.getBoundingClientRect(),w=Math.min(260,window.innerWidth-20);
+  const left=Math.max(10,Math.min(window.innerWidth-w-10,r.left+r.width/2-w/2));
+  moreMenu.style.left=left+'px';moreMenu.style.right='auto';
+  moreMenu.style.bottom=Math.max(10,window.innerHeight-r.top+8)+'px';
+ };
+ const toggleMore=force=>{
+  const open=force===undefined?!moreMenu.classList.contains('open'):!!force;
+  moreMenu.classList.toggle('open',open);more.setAttribute('aria-expanded',String(open));
+  const createFab=$('#uxCreateFab');if(createFab)createFab.style.visibility=open?'hidden':'';
+  if(open)positionMoreMenu();
+ };
  more.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();toggleMore()});
+ window.addEventListener('resize',()=>{if(moreMenu.classList.contains('open'))positionMoreMenu()});
+ window.addEventListener('scroll',()=>{if(moreMenu.classList.contains('open'))positionMoreMenu()},true);
  document.addEventListener('click',e=>{if(!moreMenu.contains(e.target)&&!more.contains(e.target))toggleMore(false)});
  document.addEventListener('keydown',e=>{if(e.key==='Escape')toggleMore(false)});
  window.toggleMenu=toggleMore;
@@ -114,7 +127,9 @@ function installSettings(){
   const box=$('#settingsBox');if(!box||box.dataset.uxCategories)return;
   const cards=Array.from(box.children).filter(x=>x.tagName==='SECTION');
   if(!cards.length)return;
-  const names=['الإشعارات والأصوات','المظهر وسهولة القراءة','التطبيق'];
+  const reorder=document.createElement('section');reorder.className='card ux-reorder-section';reorder.innerHTML='<h3>ترتيب الأقسام</h3><p class="muted">رتّبي الأقسام بالطريقة التي تناسبك. يُحفظ الترتيب لحسابك على هذا الجهاز.</p><ol class="ux-reorder-list" id="uxSectionOrderList"></ol><button type="button" class="btn secondary" id="uxResetSectionOrder">إعادة الترتيب الافتراضي</button>';
+  box.append(reorder);cards.push(reorder);
+  const names=['الإشعارات والأصوات','المظهر وسهولة القراءة','التطبيق','ترتيب الأقسام'];
   const tabs=document.createElement('div');tabs.className='ux-settings-tabs';
   cards.forEach((card,i)=>{const b=document.createElement('button');b.type='button';b.textContent=names[i]||('إعدادات '+(i+1));b.addEventListener('click',()=>select(i));tabs.append(b);card.classList.add('ux-settings-card')});
   box.prepend(tabs);
@@ -122,7 +137,34 @@ function installSettings(){
   box.append(extra);
   extra.querySelectorAll('[data-font]').forEach(b=>b.addEventListener('click',()=>{const n=b.dataset.font;const v=n==='0'?100:Math.max(85,Math.min(150,(Number(prefs.font)||100)+(n==='+'?5:-5)));setFont(v);const r=box.querySelector('input[type="range"]');if(r)r.value=v}));
   const rm=extra.querySelector('#uxReduceMotion');try{rm.checked=localStorage.getItem('masahatuna-reduce-motion')==='1'}catch(e){};document.documentElement.classList.toggle('ux-reduce-motion',rm.checked);rm.addEventListener('change',()=>{document.documentElement.classList.toggle('ux-reduce-motion',rm.checked);try{localStorage.setItem('masahatuna-reduce-motion',rm.checked?'1':'0')}catch(e){}});
-  function select(i){cards.forEach((c,n)=>c.hidden=n!==i);tabs.querySelectorAll('button').forEach((b,n)=>b.classList.toggle('active',n===i));extra.hidden=i!==1;try{localStorage.setItem('masahatuna-settings-tab',String(i))}catch(e){}}
+  function select(i){cards.forEach((c,n)=>c.hidden=n!==i);tabs.querySelectorAll('button').forEach((b,n)=>b.classList.toggle('active',n===i));extra.hidden=i!==1;reorder.hidden=i!==3;try{localStorage.setItem('masahatuna-settings-tab',String(i))}catch(e){}}
+  const nav=document.getElementById('mainNav'),moreMenu=document.querySelector('.ux-more-menu');
+  const originalOrder=nav?Array.from(nav.querySelectorAll(':scope > [data-nav]')).map(b=>b.dataset.nav):[];
+  const accountKey=()=>{try{return 'masahatuna-section-order-v1-'+((window.auth&&auth.currentUser&&auth.currentUser.uid)||'guest')}catch(e){return 'masahatuna-section-order-v1-guest'}};
+  const readOrder=()=>{try{const a=JSON.parse(localStorage.getItem(accountKey())||'[]');return Array.isArray(a)?a:[]}catch(e){return []}};
+  const applyOrder=order=>{
+   if(!nav)return;const nodes=new Map(Array.from(nav.querySelectorAll(':scope > [data-nav]')).map(b=>[b.dataset.nav,b]));
+   const ids=[...order.filter(id=>nodes.has(id)),...originalOrder.filter(id=>nodes.has(id)&&!order.includes(id))];
+   ids.forEach(id=>nav.append(nodes.get(id)));
+   if(moreMenu){const clones=new Map(Array.from(moreMenu.querySelectorAll('[data-more-nav]')).map(b=>[b.dataset.moreNav,b]));ids.filter(id=>clones.has(id)).forEach(id=>moreMenu.append(clones.get(id)))}
+  };
+  const renderOrder=()=>{
+   const list=reorder.querySelector('#uxSectionOrderList');if(!list||!nav)return;
+   const ids=Array.from(nav.querySelectorAll(':scope > [data-nav]')).map(b=>b.dataset.nav);
+   list.innerHTML=ids.map((id,i)=>'<li draggable="true" data-order-id="'+id+'"><span class="ux-reorder-grip" aria-hidden="true">⠿</span><span>'+((paths[id])||id)+'</span><button type="button" data-up aria-label="تحريك لأعلى" '+(i===0?'disabled':'')+'>↑</button><button type="button" data-down aria-label="تحريك لأسفل" '+(i===ids.length-1?'disabled':'')+'>↓</button></li>').join('');
+   let drag=null;
+   list.querySelectorAll('[data-order-id]').forEach(li=>{
+    li.addEventListener('dragstart',()=>{drag=li.dataset.orderId;li.classList.add('dragging')});
+    li.addEventListener('dragend',()=>{li.classList.remove('dragging');drag=null;saveOrder()});
+    li.addEventListener('dragover',e=>{e.preventDefault();if(!drag||drag===li.dataset.orderId)return;const all=Array.from(list.children),from=all.findIndex(x=>x.dataset.orderId===drag),to=all.indexOf(li);if(from<to)li.after(all[from]);else li.before(all[from])});
+    li.querySelector('[data-up]').addEventListener('click',()=>move(li.dataset.orderId,-1));
+    li.querySelector('[data-down]').addEventListener('click',()=>move(li.dataset.orderId,1));
+   });
+  };
+  const saveOrder=()=>{const ids=Array.from(reorder.querySelectorAll('[data-order-id]')).map(x=>x.dataset.orderId);applyOrder(ids);try{localStorage.setItem(accountKey(),JSON.stringify(ids))}catch(e){}renderOrder()};
+  const move=(id,delta)=>{const ids=Array.from(reorder.querySelectorAll('[data-order-id]')).map(x=>x.dataset.orderId),i=ids.indexOf(id),j=i+delta;if(j<0||j>=ids.length)return;[ids[i],ids[j]]=[ids[j],ids[i]];applyOrder(ids);try{localStorage.setItem(accountKey(),JSON.stringify(ids))}catch(e){}renderOrder()};
+  reorder.querySelector('#uxResetSectionOrder').addEventListener('click',()=>{try{localStorage.removeItem(accountKey())}catch(e){}applyOrder(originalOrder);renderOrder()});
+  applyOrder(readOrder());renderOrder();
   let initial=0;try{initial=Math.max(0,Math.min(cards.length-1,Number(localStorage.getItem('masahatuna-settings-tab'))||0))}catch(e){};select(initial);box.dataset.uxCategories='1';
  };
  wrapped.__uxWrapped=true;window.renderSettings=wrapped;
