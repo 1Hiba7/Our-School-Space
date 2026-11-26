@@ -46,6 +46,14 @@ function initShell(){
   scheduleButton.addEventListener('click',()=>{sub.hidden=!sub.hidden;syncSub()});
   nav.querySelectorAll('[data-nav]:not([data-nav="schedule"])').forEach(b=>b.addEventListener('click',()=>{sub.hidden=true;syncSub()}));
   scheduleButton.insertAdjacentElement('afterend',sub);syncSub();
+  const syncScheduleMode=mode=>sub.querySelectorAll('[data-schedule-mode]').forEach(x=>{const on=x.dataset.scheduleMode===mode;x.classList.toggle('active',on);x.setAttribute('aria-current',on?'page':'false')});
+  const activeMode=()=>{const active=document.querySelector('#swDay.active,#swWeek.active,#swMonth.active');return active?.id==='swWeek'?'week':active?.id==='swMonth'?'month':'day'};
+  syncScheduleMode(activeMode());
+  if(typeof window.setScheduleMode==='function'&&!window.__uxScheduleModeWrapped){
+   const originalSetScheduleMode=window.setScheduleMode;
+   window.setScheduleMode=function(mode){const result=originalSetScheduleMode.apply(this,arguments);syncScheduleMode(mode);return result};
+   window.__uxScheduleModeWrapped=true;
+  }
  }
  if(settings)bottom.append(settings);if(admin)bottom.append(admin);
  aside.append(nav,bottom);
