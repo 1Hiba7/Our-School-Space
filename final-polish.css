@@ -1,0 +1,128 @@
+
+/* Final polish — 2026-11 */
+.ux-sidebar .ux-side-bottom{display:grid;gap:5px;margin-top:auto;padding:10px;border-top:1px solid var(--line)}
+.ux-sidebar .ux-side-bottom>button,.ux-sidebar .ux-side-bottom #mainNav>button,
+.ux-sidebar #mainNav>button{min-height:42px;border:0;border-radius:12px;background:transparent;color:var(--ink);font:inherit;font-weight:700;display:flex;align-items:center;gap:11px;padding:9px 12px;width:100%;text-align:right}
+.ux-sidebar .ux-side-bottom>button:hover,.ux-sidebar #mainNav>button:hover{background:var(--sky);color:var(--accent2)}
+.ux-sidebar .ux-side-bottom>button.active,.ux-sidebar #mainNav>button.active{background:var(--accent);color:#fff}
+.ux-sidebar.collapsed .ux-side-bottom>button{justify-content:center;padding-inline:4px}
+.ux-sidebar.collapsed .ux-side-bottom>button .ux-nav-label{display:none}
+.ux-sidebar.collapsed .ux-side-bottom>button .ux-nav-icon{margin:0}
+.ux-sidebar #mainNav>button.active .ux-nav-icon svg,
+.ux-mobile-nav button.active svg,.ux-more-menu button.active svg{fill:currentColor;fill-opacity:.16;stroke-width:2.25}
+.ux-mobile-nav{min-height:64px!important;height:auto!important;padding:6px 8px calc(6px + env(safe-area-inset-bottom))!important;gap:3px!important}
+.ux-mobile-nav button{min-height:48px!important;padding:5px 7px!important}
+.ux-more{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.ux-more svg{width:20px;height:20px}
+.ux-more-menu{bottom:calc(76px + env(safe-area-inset-bottom))!important;transform:translateY(8px)}
+.ux-more-menu.open{transform:translateY(0)}
+#uxCreateFab{z-index:245!important;box-shadow:0 8px 24px #0003}
+.ux-create-menu{z-index:246!important;transform-origin:bottom right}
+.ux-create-menu:not([hidden]){display:grid;animation:uxCreateIn .18s cubic-bezier(.2,.8,.2,1) both}
+@keyframes uxCreateIn{from{opacity:0;transform:translateY(9px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+.ux-create-menu button{transition:background .15s,transform .15s}
+.ux-create-menu button:hover{transform:translateX(-2px)}
+.ux-floating-selection{position:fixed!important;z-index:230!important;left:50%!important;right:auto!important;bottom:calc(82px + env(safe-area-inset-bottom))!important;transform:translateX(-50%);width:min(720px,calc(100vw - 28px));max-width:720px;box-shadow:0 14px 42px #0003;backdrop-filter:blur(14px);background:color-mix(in srgb,var(--card) 90%,transparent)!important;border:1px solid var(--line);border-radius:16px}
+.ux-floating-selection.ux-collapsed{width:auto;min-width:180px}
+.ux-search-highlight{outline:3px solid var(--accent)!important;outline-offset:3px;transition:outline-color .2s}
+.ux-scoped-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.ux-scoped-filters{display:flex;justify-content:flex-start;margin:8px 0;color:var(--muted);font-size:.9rem}
+.ux-scoped-filters select{margin-inline-start:8px;padding:6px 10px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink)}
+.ux-note-detail[hidden]{display:none!important}
+.ux-note-detail.desktop-open{display:block}
+@media(min-width:901px) and (max-width:1350px){
+ .ux-notes-workspace{grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr)!important;gap:12px!important}
+ .ux-notes-board,.ux-note-detail{min-width:0!important;width:100%!important}
+ .ux-notes-grid{grid-template-columns:repeat(auto-fill,minmax(145px,1fr))!important;gap:9px!important}
+ .ux-notes-toolbar{grid-template-columns:minmax(0,1fr) auto auto!important}
+ .ux-note-detail-head{flex-wrap:nowrap!important}
+ .ux-note-detail-head>div{min-width:0!important}
+ .ux-note-read,.ux-note-body{overflow-wrap:anywhere;min-width:0}
+}
+@media(max-width:900px){
+ .ux-mobile-nav{min-height:60px!important;padding-bottom:calc(5px + env(safe-area-inset-bottom))!important}
+ .ux-floating-selection{bottom:calc(72px + env(safe-area-inset-bottom))!important}
+ #uxCreateFab{bottom:calc(96px + env(safe-area-inset-bottom))!important}
+}
+@media(prefers-reduced-motion:reduce){.ux-create-menu:not([hidden]),.ux-create-menu button{animation:none!important;transition:none!important}}
+
+
+/* Final requested fixes: anchored More menu, single More glyph, local search and section order */
+.ux-mobile-nav .ux-more:before{content:none!important;display:none!important}
+.ux-more-menu{z-index:260!important}
+.ux-more-menu.open{display:grid!important}
+#uxCreateFab[style*="visibility: hidden"]{pointer-events:none!important}
+#taskFab{display:none!important}
+.ux-notes-toolbar{width:100%;display:grid!important;grid-template-columns:minmax(260px,1fr) auto auto!important;align-items:center;gap:10px!important}
+.ux-notes-toolbar input{width:100%!important;min-width:0!important}
+.ux-note-detail-actions button{min-width:40px;min-height:38px;padding:8px!important;display:inline-grid;place-items:center}
+.ux-note-detail-actions button svg{display:block}
+.ux-reorder-section{padding:16px;margin-top:12px}
+.ux-reorder-list{list-style:none;margin:12px 0;padding:0;display:grid;gap:7px}
+.ux-reorder-list li{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1px solid var(--line);border-radius:12px;background:var(--card);touch-action:pan-y}
+.ux-reorder-list li.dragging{opacity:.5;border-style:dashed}
+.ux-reorder-list li>span:nth-child(2){flex:1;font-weight:700}
+.ux-reorder-grip{color:var(--muted);font-size:1.2rem;cursor:grab}
+.ux-reorder-list button{width:34px;height:34px;border:1px solid var(--line);border-radius:9px;background:var(--sky);color:var(--accent2)}
+.ux-reorder-list button:disabled{opacity:.35;cursor:not-allowed}
+.ux-reorder-section[hidden]{display:none!important}
+.section-search-toggle{display:none!important}
+#activityFilter.hidden,#bookFilters.hidden,#taskSearchWrap.hidden,#infoBar.hidden{display:grid!important}
+#activityFilter,#bookFilters,#taskSearchWrap,#infoBar{margin:12px 0;grid-template-columns:minmax(220px,1fr) repeat(4,minmax(110px,auto));gap:9px;align-items:center;padding:12px}
+#taskSearchWrap input{width:100%}
+@media(min-width:901px){
+ .ux-notes-toolbar{grid-template-columns:minmax(380px,1fr) auto auto!important}
+ #activityFilter .pf-q,#bookFilters .pf-q,#infoBar .pf-q{min-width:280px}
+}
+@media(max-width:900px){
+ .ux-notes-toolbar{grid-template-columns:minmax(0,1fr) auto auto!important}
+ #activityFilter,#bookFilters,#taskSearchWrap,#infoBar{grid-template-columns:1fr 1fr;gap:8px}
+ #activityFilter .pf-q,#bookFilters .pf-q,#infoBar .pf-q,#taskSearchWrap input{grid-column:1/-1}
+ .ux-more-menu{max-height:min(65vh,520px)}
+}
+@media(max-width:520px){
+ .ux-notes-toolbar{grid-template-columns:minmax(0,1fr) auto!important}
+ .ux-notes-toolbar input{grid-column:1/-1}
+ .ux-notes-toolbar select,.ux-notes-toolbar #uxNewNote{width:100%;max-width:none}
+}
+
+
+/* Responsive fixes: notes detail never competes with the board at medium widths. */
+@media (min-width:901px) and (max-width:1060px){
+ .ux-notes-workspace{grid-template-columns:minmax(0,1fr)!important;gap:12px!important}
+ .ux-notes-workspace:has(.ux-note-detail:not([hidden])) .ux-notes-board{display:none!important}
+ .ux-notes-workspace .ux-note-detail:not([hidden]){display:block!important;width:100%!important;min-width:0!important}
+ .ux-notes-toolbar{grid-template-columns:minmax(0,1fr) auto auto!important}
+}
+@media (min-width:761px) and (max-width:900px){
+ .ux-notes-toolbar{grid-template-columns:minmax(0,1fr) auto auto!important;gap:9px!important}
+ .ux-notes-toolbar input{grid-column:1/-1!important;width:100%!important;min-width:0!important}
+ .ux-notes-toolbar select,.ux-notes-toolbar #uxNewNote{grid-row:2;min-width:0!important;max-width:none!important}
+ .ux-notes-toolbar select{justify-self:stretch}
+ .ux-notes-toolbar #uxNewNote{justify-self:stretch}
+}
+/* Sidebar: keep the brand and admin actions visible; scroll the navigation independently. */
+@media (min-width:901px){
+ .ux-sidebar{height:calc(100dvh - var(--ux-topbar));overflow:hidden!important;min-height:0}
+ .ux-sidebar #mainNav{flex:1 1 auto;min-height:0;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--line) transparent;padding-inline-end:3px}
+ .ux-sidebar #mainNav::-webkit-scrollbar{width:6px}
+ .ux-sidebar #mainNav::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
+ .ux-sidebar .ux-side-brand,.ux-sidebar .ux-side-bottom{flex:0 0 auto}
+ .app.ux-collapsed{--ux-sidebar:76px}
+ #uxCreateFab{right:calc(var(--ux-sidebar,244px) + 22px)!important}
+ .ux-create-menu{right:calc(var(--ux-sidebar,244px) + 28px)!important}
+}
+/* Sidebar schedule submenu, visually nested under its parent. */
+.ux-sidebar #mainNav .ux-nav-parent{position:relative;padding-inline-start:34px!important}
+.ux-sidebar #mainNav .ux-nav-chevron{position:absolute;left:12px;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;color:var(--muted);transition:transform .16s ease}
+.ux-sidebar #mainNav .ux-nav-chevron svg{width:16px;height:16px}
+.ux-sidebar #mainNav .ux-schedule-subnav{display:grid;gap:3px;margin:0 8px 6px 22px;padding:4px 10px 5px 0;border-right:1px solid var(--line)}
+.ux-sidebar #mainNav .ux-schedule-subnav[hidden]{display:none!important}
+.ux-sidebar #mainNav .ux-schedule-subnav button{min-height:34px!important;padding:6px 12px!important;border:0!important;border-radius:9px!important;background:transparent!important;color:var(--muted)!important;font:inherit;font-size:.88rem!important;font-weight:550!important;text-align:right;justify-content:flex-start}
+.ux-sidebar #mainNav .ux-schedule-subnav button:hover,.ux-sidebar #mainNav .ux-schedule-subnav button.active{background:color-mix(in srgb,var(--accent) 11%,var(--card))!important;color:var(--accent2)!important}
+.ux-sidebar.collapsed #mainNav .ux-nav-parent{padding-inline:5px!important}
+.ux-sidebar.collapsed #mainNav .ux-nav-chevron{display:none}
+.ux-sidebar.collapsed #mainNav .ux-schedule-subnav{position:fixed;right:84px;top:calc(var(--ux-topbar) + 112px);z-index:190;width:150px;margin:0;padding:8px;border:1px solid var(--line);border-radius:12px;background:var(--card);box-shadow:0 12px 30px #0003}
+@media(max-width:900px){.ux-sidebar #mainNav .ux-schedule-subnav{display:none!important}}
+/* The brand toggle uses a real panel-chevron glyph, never the fallback home icon. */
+.ux-brand-collapse svg{width:19px;height:19px}
