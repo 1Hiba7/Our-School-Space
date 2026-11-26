@@ -575,7 +575,7 @@ body{font-family:"IBM Plex Sans Arabic",sans-serif;background:var(--paper);color
 .ux-sidebar .ux-side-bottom #mainNav button:hover,.ux-sidebar #mainNav button:hover{background:var(--sky);color:var(--accent2)}
 .ux-sidebar .ux-side-bottom #mainNav button.active{background:var(--accent);color:#fff}
 .ux-sidebar .ux-collapse{font-size:0!important}.ux-sidebar .ux-collapse:before{content:"⇤";font-size:19px}.ux-sidebar.collapsed .ux-collapse:before{content:"⇥"}
-.ux-sidebar .ux-collapse .ux-label{display:none!important}.ux-sidebar .ux-collapse:hover:after{content:"طي الشريط";font-size:11px}
+.ux-sidebar .ux-collapse .ux-label{display:none!important}.ux-sidebar .ux-collapse:hover:after{content:none!important;display:none!important}
 .ux-more-menu{display:none}
 @media(max-width:900px){
  .ux-sidebar{display:none!important}.app>.page,.app.ux-collapsed>.page{margin-right:0!important;padding-bottom:calc(88px + env(safe-area-inset-bottom))}
