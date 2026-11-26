@@ -85,3 +85,44 @@
  .ux-notes-toolbar input{grid-column:1/-1}
  .ux-notes-toolbar select,.ux-notes-toolbar #uxNewNote{width:100%;max-width:none}
 }
+
+
+/* Responsive fixes: notes detail never competes with the board at medium widths. */
+@media (min-width:901px) and (max-width:1060px){
+ .ux-notes-workspace{grid-template-columns:minmax(0,1fr)!important;gap:12px!important}
+ .ux-notes-workspace:has(.ux-note-detail:not([hidden])) .ux-notes-board{display:none!important}
+ .ux-notes-workspace .ux-note-detail:not([hidden]){display:block!important;width:100%!important;min-width:0!important}
+ .ux-notes-toolbar{grid-template-columns:minmax(0,1fr) auto auto!important}
+}
+@media (min-width:761px) and (max-width:900px){
+ .ux-notes-toolbar{grid-template-columns:minmax(0,1fr) auto auto!important;gap:9px!important}
+ .ux-notes-toolbar input{grid-column:1/-1!important;width:100%!important;min-width:0!important}
+ .ux-notes-toolbar select,.ux-notes-toolbar #uxNewNote{grid-row:2;min-width:0!important;max-width:none!important}
+ .ux-notes-toolbar select{justify-self:stretch}
+ .ux-notes-toolbar #uxNewNote{justify-self:stretch}
+}
+/* Sidebar: keep the brand and admin actions visible; scroll the navigation independently. */
+@media (min-width:901px){
+ .ux-sidebar{height:calc(100dvh - var(--ux-topbar));overflow:hidden!important;min-height:0}
+ .ux-sidebar #mainNav{flex:1 1 auto;min-height:0;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--line) transparent;padding-inline-end:3px}
+ .ux-sidebar #mainNav::-webkit-scrollbar{width:6px}
+ .ux-sidebar #mainNav::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
+ .ux-sidebar .ux-side-brand,.ux-sidebar .ux-side-bottom{flex:0 0 auto}
+ .app.ux-collapsed{--ux-sidebar:76px}
+ #uxCreateFab{right:calc(var(--ux-sidebar,244px) + 22px)!important}
+ .ux-create-menu{right:calc(var(--ux-sidebar,244px) + 28px)!important}
+}
+/* Sidebar schedule submenu, visually nested under its parent. */
+.ux-sidebar #mainNav .ux-nav-parent{position:relative;padding-inline-start:34px!important}
+.ux-sidebar #mainNav .ux-nav-chevron{position:absolute;left:12px;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;color:var(--muted);transition:transform .16s ease}
+.ux-sidebar #mainNav .ux-nav-chevron svg{width:16px;height:16px}
+.ux-sidebar #mainNav .ux-schedule-subnav{display:grid;gap:3px;margin:0 8px 6px 22px;padding:4px 10px 5px 0;border-right:1px solid var(--line)}
+.ux-sidebar #mainNav .ux-schedule-subnav[hidden]{display:none!important}
+.ux-sidebar #mainNav .ux-schedule-subnav button{min-height:34px!important;padding:6px 12px!important;border:0!important;border-radius:9px!important;background:transparent!important;color:var(--muted)!important;font:inherit;font-size:.88rem!important;font-weight:550!important;text-align:right;justify-content:flex-start}
+.ux-sidebar #mainNav .ux-schedule-subnav button:hover,.ux-sidebar #mainNav .ux-schedule-subnav button.active{background:color-mix(in srgb,var(--accent) 11%,var(--card))!important;color:var(--accent2)!important}
+.ux-sidebar.collapsed #mainNav .ux-nav-parent{padding-inline:5px!important}
+.ux-sidebar.collapsed #mainNav .ux-nav-chevron{display:none}
+.ux-sidebar.collapsed #mainNav .ux-schedule-subnav{position:fixed;right:84px;top:calc(var(--ux-topbar) + 112px);z-index:190;width:150px;margin:0;padding:8px;border:1px solid var(--line);border-radius:12px;background:var(--card);box-shadow:0 12px 30px #0003}
+@media(max-width:900px){.ux-sidebar #mainNav .ux-schedule-subnav{display:none!important}}
+/* The brand toggle uses a real panel-chevron glyph, never the fallback home icon. */
+.ux-brand-collapse svg{width:19px;height:19px}
