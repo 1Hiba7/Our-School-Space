@@ -24,15 +24,15 @@ function labelize(b,id){const t=(b.textContent||paths[id]||id).trim();b.textCont
 function initShell(){
  const nav=$('#mainNav'),head=$('.topbar'),app=$('.app'),main=$('.app>.page');if(!nav||!head||!app||!main||$('#uxSidebar'))return;
  const aside=document.createElement('aside');aside.id='uxSidebar';aside.className='ux-sidebar';aside.setAttribute('aria-label','التنقل الرئيسي');
- const brand=document.createElement('div');brand.className='ux-side-brand';brand.innerHTML='<img src="Our-School-Space.png" alt=""><strong>مساحتنا المدرسية</strong>';aside.append(brand);
+ const brand=document.createElement('div');brand.className='ux-side-brand';brand.innerHTML='<img src="Our-School-Space.png" alt="شعار مساحتنا المدرسية"><strong>مساحتنا المدرسية</strong><button type="button" class="ux-brand-collapse" aria-label="طي الشريط" title="طي الشريط">'+svg('panel-left-close')+'</button>';aside.append(brand);
  const settings=nav.querySelector('[data-nav="settings"]'),admin=nav.querySelector('[data-nav="admin"]');
  const bottom=document.createElement('div');bottom.className='ux-side-bottom';
  Array.from(nav.querySelectorAll('[data-nav]')).forEach(b=>labelize(b,b.dataset.nav));
  if(settings)bottom.append(settings);if(admin)bottom.append(admin);
  aside.append(nav,bottom);
- const collapse=document.createElement('button');collapse.type='button';collapse.className='ux-collapse';collapse.innerHTML='';collapse.title='';collapse.setAttribute('aria-label','طي الشريط');collapse.addEventListener('click',()=>{aside.classList.toggle('collapsed');app.classList.toggle('ux-collapsed',aside.classList.contains('collapsed'));try{localStorage.setItem('masahatuna-sidebar-collapsed',aside.classList.contains('collapsed')?'1':'0')}catch(e){}});aside.append(collapse);
+ const collapse=brand.querySelector('.ux-brand-collapse');const syncCollapse=()=>{const closed=aside.classList.contains('collapsed');collapse.setAttribute('aria-label',closed?'توسيع الشريط':'طي الشريط');collapse.title=closed?'توسيع الشريط':'طي الشريط';collapse.innerHTML=svg(closed?'panel-left-open':'panel-left-close')};collapse.addEventListener('click',()=>{aside.classList.toggle('collapsed');app.classList.toggle('ux-collapsed',aside.classList.contains('collapsed'));syncCollapse();try{localStorage.setItem('masahatuna-sidebar-collapsed',aside.classList.contains('collapsed')?'1':'0')}catch(e){}});
  head.after(aside);
- try{if(localStorage.getItem('masahatuna-sidebar-collapsed')==='1'){aside.classList.add('collapsed');app.classList.add('ux-collapsed')}}catch(e){}
+ try{if(localStorage.getItem('masahatuna-sidebar-collapsed')==='1'){aside.classList.add('collapsed');app.classList.add('ux-collapsed')}}catch(e){}syncCollapse();
  const actions=$('.top-actions');if(actions){
   const search=document.createElement('button');search.type='button';search.className='ux-search-trigger';search.title='بحث موحّد';search.setAttribute('aria-label','بحث موحّد');search.innerHTML=svg('search');search.addEventListener('click',openSearch);actions.prepend(search);
   const account=$('#accountName');if(account){account.classList.add('ux-account');account.setAttribute('aria-label','الحساب والملف الشخصي');account.title='الملف الشخصي';const setAvatar=()=>{const name=(typeof user==='function'&&user()?.name)||'';const avatar=name?name.trim().split(/\s+/).slice(0,2).map(x=>x[0]).join(''):'؟';if(account.textContent!==avatar)account.textContent=avatar};setAvatar();new MutationObserver(setAvatar).observe(account,{childList:true,characterData:true,subtree:true})}
@@ -130,14 +130,23 @@ function installSettings(){
   const reorder=document.createElement('section');reorder.className='card ux-reorder-section';reorder.innerHTML='<h3>ترتيب الأقسام</h3><p class="muted">رتّبي الأقسام بالطريقة التي تناسبك. يُحفظ الترتيب لحسابك على هذا الجهاز.</p><ol class="ux-reorder-list" id="uxSectionOrderList"></ol><button type="button" class="btn secondary" id="uxResetSectionOrder">إعادة الترتيب الافتراضي</button>';
   box.append(reorder);cards.push(reorder);
   const names=['الإشعارات والأصوات','المظهر وسهولة القراءة','التطبيق','ترتيب الأقسام'];
-  const tabs=document.createElement('div');tabs.className='ux-settings-tabs';
-  cards.forEach((card,i)=>{const b=document.createElement('button');b.type='button';b.textContent=names[i]||('إعدادات '+(i+1));b.addEventListener('click',()=>select(i));tabs.append(b);card.classList.add('ux-settings-card')});
-  box.prepend(tabs);
+  const categories=document.createElement('div');categories.className='ux-settings-categories';categories.setAttribute('aria-label','فئات الإعدادات');
+  const categoryInfo=[
+   ['bell','إدارة التنبيهات والأصوات وتفضيلات أنواع الإشعارات'],
+   ['palette','الثيم وألوان الهوية وحجم الخط والتباين وإمكانية الوصول'],
+   ['smartphone','تحديث التطبيق وتثبيته عند دعم الجهاز'],
+   ['arrow-up-down','ترتيب أقسام الموقع وإعادتها إلى الترتيب الافتراضي']
+  ];
+  const categoryIcons={bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/>',palette:'<path d="M12 3a9 9 0 1 0 0 18h1a2 2 0 0 0 1-3.7 1.5 1.5 0 0 1 .8-2.8H17a4 4 0 0 0 4-4c0-4.1-4-7.5-9-7.5Z"/><circle cx="7.5" cy="10" r="1"/><circle cx="11" cy="7" r="1"/><circle cx="16" cy="8" r="1"/>',smartphone:'<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/>','arrow-up-down':'<path d="m7 7 5-5 5 5M12 2v14m5 1-5 5-5-5"/>'};
+  cards.forEach((card,i)=>{card.classList.add('ux-settings-card');card.hidden=true;const b=document.createElement('button');b.type='button';b.className='ux-settings-category';b.innerHTML='<span class="ux-settings-category-icon"><svg viewBox="0 0 24 24" aria-hidden="true">'+(categoryIcons[categoryInfo[i]?.[0]]||'')+'</svg></span><span class="ux-settings-category-copy"><strong>'+names[i]+'</strong><small>'+categoryInfo[i][1]+'</small></span><span class="ux-settings-category-arrow" aria-hidden="true">←</span>';b.addEventListener('click',()=>select(i));categories.append(b)});
+  box.prepend(categories);
   const extra=document.createElement('section');extra.className='card ux-accessibility-extra';extra.innerHTML='<h3>إمكانية الوصول</h3><div class="ux-access-actions"><button type="button" data-font="-">تصغير الخط</button><button type="button" data-font="+">تكبير الخط</button><button type="button" data-font="0">الحجم الافتراضي</button></div><label class="ux-setting-toggle"><span>تقليل الحركة والانتقالات</span><input type="checkbox" id="uxReduceMotion"></label>';
   box.append(extra);
   extra.querySelectorAll('[data-font]').forEach(b=>b.addEventListener('click',()=>{const n=b.dataset.font;const v=n==='0'?100:Math.max(85,Math.min(150,(Number(prefs.font)||100)+(n==='+'?5:-5)));setFont(v);const r=box.querySelector('input[type="range"]');if(r)r.value=v}));
   const rm=extra.querySelector('#uxReduceMotion');try{rm.checked=localStorage.getItem('masahatuna-reduce-motion')==='1'}catch(e){};document.documentElement.classList.toggle('ux-reduce-motion',rm.checked);rm.addEventListener('change',()=>{document.documentElement.classList.toggle('ux-reduce-motion',rm.checked);try{localStorage.setItem('masahatuna-reduce-motion',rm.checked?'1':'0')}catch(e){}});
-  function select(i){cards.forEach((c,n)=>c.hidden=n!==i);tabs.querySelectorAll('button').forEach((b,n)=>b.classList.toggle('active',n===i));extra.hidden=i!==1;reorder.hidden=i!==3;try{localStorage.setItem('masahatuna-settings-tab',String(i))}catch(e){}}
+  const back=document.createElement('button');back.type='button';back.className='btn secondary ux-settings-back';back.textContent='→ جميع فئات الإعدادات';back.addEventListener('click',showCategories);box.prepend(back);
+  function showCategories(){categories.hidden=false;back.hidden=true;cards.forEach(c=>c.hidden=true);extra.hidden=true;reorder.hidden=true}
+  function select(i){categories.hidden=true;back.hidden=false;cards.forEach((c,n)=>c.hidden=n!==i);extra.hidden=i!==1;reorder.hidden=i!==3;try{localStorage.setItem('masahatuna-settings-tab',String(i))}catch(e){}}
   const nav=document.getElementById('mainNav'),moreMenu=document.querySelector('.ux-more-menu');
   const originalOrder=nav?Array.from(nav.querySelectorAll(':scope > [data-nav]')).map(b=>b.dataset.nav):[];
   const accountKey=()=>{try{return 'masahatuna-section-order-v1-'+((window.auth&&auth.currentUser&&auth.currentUser.uid)||'guest')}catch(e){return 'masahatuna-section-order-v1-guest'}};
@@ -165,7 +174,7 @@ function installSettings(){
   const move=(id,delta)=>{const ids=Array.from(reorder.querySelectorAll('[data-order-id]')).map(x=>x.dataset.orderId),i=ids.indexOf(id),j=i+delta;if(j<0||j>=ids.length)return;[ids[i],ids[j]]=[ids[j],ids[i]];applyOrder(ids);try{localStorage.setItem(accountKey(),JSON.stringify(ids))}catch(e){}renderOrder()};
   reorder.querySelector('#uxResetSectionOrder').addEventListener('click',()=>{try{localStorage.removeItem(accountKey())}catch(e){}applyOrder(originalOrder);renderOrder()});
   applyOrder(readOrder());renderOrder();
-  let initial=0;try{initial=Math.max(0,Math.min(cards.length-1,Number(localStorage.getItem('masahatuna-settings-tab'))||0))}catch(e){};select(initial);box.dataset.uxCategories='1';
+  showCategories();box.dataset.uxCategories='1';
  };
  wrapped.__uxWrapped=true;window.renderSettings=wrapped;
 }
