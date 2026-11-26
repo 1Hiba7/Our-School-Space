@@ -18,7 +18,10 @@ wrench:'<path d="M14.7 6.3a5 5 0 0 0-6.4 6.4L3 18l3 3 5.3-5.3a5 5 0 0 0 6.4-6.4L
 'sliders-horizontal':'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M2 14h4M10 8h4M18 16h4"/>',
 'map-pin':'<path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/>',
 search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
-shield:'<path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/>'
+shield:'<path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/>,
+'panel-left-close':'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 9l-3 3 3 3"/>',
+'panel-left-open':'<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M12 9l3 3-3 3"/>',
+'chevron-down':'<path d="m6 9 6 6 6-6"/>','chevron-up':'<path d="m6 15 6-6 6 6"/>'
 };return '<svg '+common+'>'+ (p[name]||p.house)+'</svg>'}
 function labelize(b,id){const t=(b.textContent||paths[id]||id).trim();b.textContent='';const ic=document.createElement('span');ic.className='ux-nav-icon';ic.innerHTML=svg(icons[id]||'house');const l=document.createElement('span');l.className='ux-nav-label';l.textContent=t;b.append(ic,l);b.dataset.uxTitle=t;b.title=t;b.setAttribute('aria-label',t)}
 function initShell(){
@@ -28,6 +31,22 @@ function initShell(){
  const settings=nav.querySelector('[data-nav="settings"]'),admin=nav.querySelector('[data-nav="admin"]');
  const bottom=document.createElement('div');bottom.className='ux-side-bottom';
  Array.from(nav.querySelectorAll('[data-nav]')).forEach(b=>labelize(b,b.dataset.nav));
+ // Expandable schedule submenu: the parent opens the schedule; child links select its view.
+ const scheduleButton=nav.querySelector('[data-nav="schedule"]');
+ if(scheduleButton&&!nav.querySelector('.ux-schedule-subnav')){
+  scheduleButton.classList.add('ux-nav-parent');
+  const arrow=document.createElement('span');arrow.className='ux-nav-chevron';arrow.innerHTML=svg('chevron-down');arrow.setAttribute('aria-hidden','true');scheduleButton.append(arrow);
+  const sub=document.createElement('div');sub.className='ux-schedule-subnav';sub.hidden=true;sub.setAttribute('role','group');sub.setAttribute('aria-label','أقسام الجدول');
+  [['day','اليوم'],['week','الأسبوع'],['month','الشهر']].forEach(([mode,title])=>{
+   const child=document.createElement('button');child.type='button';child.dataset.scheduleMode=mode;child.textContent=title;
+   child.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(typeof window.go==='function')window.go('schedule');if(typeof window.setScheduleMode==='function')window.setScheduleMode(mode);sub.querySelectorAll('button').forEach(x=>{const on=x===child;x.classList.toggle('active',on);x.setAttribute('aria-current',on?'page':'false')})});
+   sub.append(child);
+  });
+  const syncSub=()=>{const open=!sub.hidden;scheduleButton.classList.toggle('submenu-open',open);scheduleButton.setAttribute('aria-expanded',String(open));arrow.innerHTML=svg(open?'chevron-up':'chevron-down')};
+  scheduleButton.addEventListener('click',()=>{sub.hidden=!sub.hidden;syncSub()});
+  nav.querySelectorAll('[data-nav]:not([data-nav="schedule"])').forEach(b=>b.addEventListener('click',()=>{sub.hidden=true;syncSub()}));
+  scheduleButton.insertAdjacentElement('afterend',sub);syncSub();
+ }
  if(settings)bottom.append(settings);if(admin)bottom.append(admin);
  aside.append(nav,bottom);
  const collapse=brand.querySelector('.ux-brand-collapse');const syncCollapse=()=>{const closed=aside.classList.contains('collapsed');collapse.setAttribute('aria-label',closed?'توسيع الشريط':'طي الشريط');collapse.title=closed?'توسيع الشريط':'طي الشريط';collapse.innerHTML=svg(closed?'panel-left-open':'panel-left-close')};collapse.addEventListener('click',()=>{aside.classList.toggle('collapsed');app.classList.toggle('ux-collapsed',aside.classList.contains('collapsed'));syncCollapse();try{localStorage.setItem('masahatuna-sidebar-collapsed',aside.classList.contains('collapsed')?'1':'0')}catch(e){}});
@@ -216,7 +235,6 @@ function start(){
  notesUnsub=db.collection('users').doc(uid).collection('notes').onSnapshot(snap=>{
   notes=snap.docs.map(d=>({id:d.id,...d.data()}));
   if(activeNote&&!notes.some(n=>n.id===activeNote)){activeNote=null;editing=false}
-  if(!activeNote&&notes.length&&window.matchMedia('(min-width: 901px)').matches)activeNote=sorted()[0].id;
   if(!notesReady){notesReady=true;renderApp()}else{renderList()}
  },err=>{root.innerHTML='<div class="notice">'+(err&&err.code==='permission-denied'?'قواعد Firestore لا تسمح بالوصول إلى ملاحظاتك.':'تعذر تحميل الملاحظات. تحققي من الاتصال والصلاحيات.')+'</div>'});
 }
@@ -244,12 +262,12 @@ function paletteButtons(current){return [['#F5F1E8','عاجي'],['#E7F0FF','أز
 function svgPencil(){return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 4 4 4M4 20l4-.8L19 8a2.1 2.1 0 0 0-3-3L5 16z"/></svg>'}
 function renderEditor(){
  const el=$('#uxNoteEditor');if(!el)return;const n=notes.find(x=>x.id===activeNote);
- if(!n){el.innerHTML='<div class="empty">اختاري ملاحظة لعرضها أو أنشئي ملاحظة جديدة.</div>';el.classList.remove('mobile-open');return}
- el.classList.toggle('mobile-open',true);
+ if(!n){el.hidden=true;el.innerHTML='';el.classList.remove('mobile-open');return}
+ el.hidden=false;el.classList.toggle('mobile-open',true);
  if(!editing){
   el.innerHTML='<div class="ux-note-detail-head"><div><h2>'+esc(n.title||'ملاحظة بلا عنوان')+'</h2><small>أُنشئت '+stamp(n.createdAt)+' · آخر تعديل '+stamp(n.updatedAt)+'</small></div><button type="button" class="ux-note-edit-icon" id="uxEditNote" aria-label="تعديل الملاحظة" title="تعديل">'+svgPencil()+'</button><button type="button" class="icon-btn" id="uxCloseNote" aria-label="إغلاق">×</button></div><div class="ux-note-read" style="--note-bg:'+safeColor(n.color)+';--note-ink:'+noteInk()+'">'+(sanitize(n.body||'')||'<p class="muted">لا يوجد محتوى بعد.</p>')+'</div><div class="ux-note-detail-actions"><button type="button" class="btn secondary" id="uxPinNote">'+(n.pinned?'إلغاء التثبيت':'تثبيت')+'</button><button type="button" class="btn danger" id="uxDeleteNote">حذف</button></div>';
   $('#uxEditNote').onclick=()=>{editing=true;history=[];historyAt=-1;renderEditor()};
-  $('#uxCloseNote').onclick=()=>{openDetailRequested=false;el.classList.remove('mobile-open')};
+  $('#uxCloseNote').onclick=()=>{openDetailRequested=false;activeNote=null;editing=false;renderList()};
   $('#uxPinNote').onclick=()=>updateMeta({pinned:!n.pinned});$('#uxDeleteNote').onclick=deleteNote;return;
  }
  el.innerHTML='<div class="ux-note-detail-head"><input id="uxNoteTitle" maxlength="140" placeholder="عنوان الملاحظة" value="'+esc(n.title||'')+'"><button type="button" class="btn primary" id="uxDoneEdit">تم</button><button type="button" class="icon-btn" id="uxCloseNote" aria-label="إغلاق">×</button></div><div class="ux-note-meta-row"><input id="uxNoteCategory" maxlength="40" placeholder="التصنيف" value="'+esc(n.category||'')+'"><div class="ux-note-palette" aria-label="اختاري خلفية من هوية الموقع">'+paletteButtons(n.color)+'</div></div><div class="ux-note-toolbar" role="toolbar" aria-label="تنسيق النص"><button type="button" data-cmd="undo" title="تراجع">↶</button><button type="button" data-cmd="redo" title="إعادة">↷</button><button type="button" data-cmd="bold"><b>B</b></button><button type="button" data-cmd="italic"><i>I</i></button><button type="button" data-cmd="formatBlock" data-value="H2">عنوان</button><button type="button" data-cmd="insertUnorderedList">قائمة</button><button type="button" data-cmd="insertOrderedList">ترقيم</button><button type="button" data-link="1">رابط</button></div><div id="uxNoteBody" class="ux-note-body" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="اكتبي ملاحظتك هنا…">'+sanitize(n.body||'')+'</div><div class="ux-note-status" id="uxNoteStatus">يُحفظ تلقائياً · '+stamp(n.updatedAt)+'</div>';
@@ -260,7 +278,7 @@ function renderEditor(){
  el.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('click',()=>{body.focus();if(b.dataset.cmd==='undo'||b.dataset.cmd==='redo'){historyAt=Math.max(0,Math.min(history.length-1,historyAt+(b.dataset.cmd==='undo'?-1:1)));body.innerHTML=history[historyAt]||'';scheduleSave();return}document.execCommand(b.dataset.cmd,false,b.dataset.value||null);push();scheduleSave()}));
  el.querySelector('[data-link]').onclick=()=>{const url=prompt('أدخلي رابطاً يبدأ بـ https://');if(!url||!/^https?:\/\//i.test(url))return;body.focus();document.execCommand('createLink',false,url);push();scheduleSave()};
  $('#uxDoneEdit').onclick=async()=>{await flushSave();editing=false;renderList()};
- $('#uxCloseNote').onclick=async()=>{await flushSave();openDetailRequested=false;el.classList.remove('mobile-open')};
+ $('#uxCloseNote').onclick=async()=>{await flushSave();openDetailRequested=false;activeNote=null;editing=false;renderList()};
 }
 function sanitize(html){
  const doc=new DOMParser().parseFromString('<div>'+html+'</div>','text/html'),allowed=new Set(['B','STRONG','I','EM','U','P','BR','UL','OL','LI','H2','H3','BLOCKQUOTE','A']);
